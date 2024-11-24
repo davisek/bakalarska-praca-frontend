@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import ASensorReadings from "../app@home/_components/a-sensor-readings.vue";
+import ASensorReadings from "@/components/a-sensor-readings.vue";
 </script>
 
 <template>

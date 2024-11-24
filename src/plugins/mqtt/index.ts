@@ -3,11 +3,11 @@ import mqtt from 'mqtt';
 const options = {
     connectTimeout: 4000,
     clientId: `mqtt_${Math.random().toString(16).slice(3)}`,
-    username: 'david',
-    password: 'davidko123',
+    username: import.meta.env.MQTT_BROKER_USERNAME,
+    password: import.meta.env.MQTT_BROKER_PASSWORD,
 };
 
-const mqttClient = mqtt.connect('ws://192.168.137.48:9001', options);
+const mqttClient = mqtt.connect(import.meta.env.MQTT_BROKER_URL, options);
 
 mqttClient.on('connect', () => {
     console.log('Connected to MQTT broker');
