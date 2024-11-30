@@ -1,15 +1,12 @@
 <script setup lang="ts">
+import ANavbar from "@/components/a-navbar.vue";
 </script>
 
 <template>
-  <header>
-    <nav>
-      <router-link to="/">Home</router-link> |
-      <router-link to="/temperature">Temperature</router-link> |
-    </nav>
-  </header>
-
-  <router-view />
+  <ANavbar />
+  <div class="max-w-screen-xl m-auto p-8 text-center">
+    <router-view />
+  </div>
 </template>
 
 <style scoped>

@@ -1,40 +1,38 @@
 <script setup lang="ts">
-import {onMounted, onUnmounted, reactive} from 'vue';
+import {onMounted, onUnmounted, reactive, watch} from 'vue';
 import axiosInstance from '@/plugins/axios';
 import mqttClient from '@/plugins/mqtt';
 
-const sensorData = reactive({
-  temperature: null as number | null,
-  symbolTemp: '' as string,
-  recordedAtTemp: '' as string,
+const props = defineProps({
+  type: {
+    type: String,
+    required: true,
+  },
+  displayName: {
+    type: String,
+    required: true,
+  },
+});
 
-  humidity: null as number | null,
-  symbolHum: '' as string,
-  recordedAtHum: '' as string,
+const sensorData = reactive({
+  value: null as number | null,
+  symbol: '' as string,
+  recordedAt: '' as string,
 
   error: '' as string | null,
 });
 
 
-const fetchSensorData = async (sensorType: string) => {
+const fetchSensorData = async () => {
   try {
-    const response = await axiosInstance.get('/sensor-readings', {
-      params: { sensor: sensorType }
-    });
-
-    if (sensorType === 'temperature') {
-      sensorData.temperature = response.value;
-      sensorData.symbolTemp = response.symbol;
-      sensorData.recordedAtTemp = response.recorded_at;
-    } else if (sensorType === 'humidity') {
-      sensorData.humidity = response.value;
-      sensorData.symbolHum = response.symbol;
-      sensorData.recordedAtHum = response.recorded_at;
-    }
+    const response = await axiosInstance.get('/sensor-readings/' + props.type);
+    sensorData.value = response.value;
+    sensorData.symbol = response.symbol;
+    sensorData.recordedAt = response.recorded_at;
 
     sensorData.error = null;
   } catch (err) {
-    sensorData.error = `Failed to load ${sensorType} data`;
+    sensorData.error = `Failed to load ${props.type} data`;
     console.error(err);
   }
 };
@@ -42,17 +40,15 @@ const fetchSensorData = async (sensorType: string) => {
 const handleMQTTMessage = (topic: string, message: Buffer) => {
   const payload = JSON.parse(message.toString());
 
-  if (topic === 'sensor-data') {
-    sensorData.temperature = payload.temperature_data;
-    sensorData.humidity = payload.humidity_data;
-    sensorData.recordedAtTemp = payload.created_at;
-    sensorData.recordedAtHum = payload.created_at;
+  if (topic === `${props.type}-data`) {
+    sensorData.value = payload.value;
+    sensorData.recordedAt = payload.created_at;
   }
 
 };
 
 const subscribeToMQTTTopics = () => {
-  mqttClient.subscribe('sensor-data', (err) => {
+  mqttClient.subscribe(`${props.type}-data`, (err) => {
     if (!err) console.log('Subscribed to sensor');
   });
 
@@ -60,37 +56,31 @@ const subscribeToMQTTTopics = () => {
 };
 
 const unsubscribeFromMQTTTopics = () => {
-  mqttClient.unsubscribe('sensor-data');
+  mqttClient.unsubscribe(`${props.type}-data`);
 };
 
 onMounted(async () => {
-  await fetchSensorData('temperature');
-  await fetchSensorData('humidity');
-
+  await fetchSensorData();
   subscribeToMQTTTopics();
 });
 
 onUnmounted(() => {
   unsubscribeFromMQTTTopics();
 });
+
+watch(() => props.type, () => {
+  fetchSensorData();
+});
 </script>
 
 <template>
   <div>
-    <h2>Sensor Data</h2>
-
     <div v-if="sensorData.error">{{ sensorData.error }}</div>
     <div v-else>
       <div>
-        <h3>Temperature Data</h3>
-        <p>Temperature: {{ sensorData.temperature }} {{ sensorData.symbolTemp }}</p>
-        <p>Recorded At: {{ sensorData.recordedAtTemp }}</p>
-      </div>
-
-      <div>
-        <h3>Humidity Data</h3>
-        <p>Humidity: {{ sensorData.humidity }} {{ sensorData.symbolHum }}</p>
-        <p>Recorded At: {{ sensorData.recordedAtHum }}</p>
+        <h3 class="text-xl font-bold mb-2">{{ props.displayName }} Data</h3>
+        <p>{{ props.displayName }}: {{ sensorData.value }} {{ sensorData.symbol }}</p>
+        <p>Recorded At: {{ sensorData.recordedAt }}</p>
       </div>
     </div>
   </div>
