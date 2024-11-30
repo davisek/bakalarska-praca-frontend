@@ -59,6 +59,10 @@ const unsubscribeFromMQTTTopics = () => {
   mqttClient.unsubscribe(`${props.type}-data`);
 };
 
+watch(() => props.type, () => {
+  fetchSensorData();
+});
+
 onMounted(async () => {
   await fetchSensorData();
   subscribeToMQTTTopics();
@@ -66,10 +70,6 @@ onMounted(async () => {
 
 onUnmounted(() => {
   unsubscribeFromMQTTTopics();
-});
-
-watch(() => props.type, () => {
-  fetchSensorData();
 });
 </script>
 
