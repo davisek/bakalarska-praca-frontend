@@ -39,7 +39,6 @@ const fetchSensorData = async () => {
 
 const handleMQTTMessage = (topic: string, message: Buffer) => {
   const payload = JSON.parse(message.toString());
-
   if (topic === `${props.type}-data`) {
     sensorData.value = payload.value;
     sensorData.recordedAt = payload.created_at;
@@ -61,6 +60,8 @@ const unsubscribeFromMQTTTopics = () => {
 
 watch(() => props.type, () => {
   fetchSensorData();
+  unsubscribeFromMQTTTopics();
+  subscribeToMQTTTopics()
 });
 
 onMounted(async () => {
