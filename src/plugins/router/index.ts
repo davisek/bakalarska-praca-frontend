@@ -2,18 +2,34 @@ import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 import Home from "@/views/app@home/home.vue";
 import Sensor from "@/views/app@sensor/sensor.vue";
 import Group from "@/views/app@group/group.vue";
-import axiosInstance from "../axios";
+import axiosInstance from "@/plugins/axios";
+import Statistics from "@/views/app@statistics/statistics.vue";
+import Groups from "@/views/app@group/groups.vue";
 
 const routes: Array<RouteRecordRaw> = [
     {
         path: '/',
-        redirect: '/home'
+        redirect: '/dashboard'
     },
 
     {
-        path: '/home',
-        name: 'Home',
+        path: '/dashboard',
+        name: 'Dashboard',
         component: Home,
+        meta: {requiresAuth: false}
+    },
+
+    {
+        path: '/groups',
+        name: 'Groups',
+        component: Groups,
+        meta: {requiresAuth: false}
+    },
+
+    {
+        path: '/statistics',
+        name: 'Statistics',
+        component: Statistics,
         meta: {requiresAuth: false}
     },
 
@@ -28,39 +44,43 @@ const router = createRouter({
     routes
 })
 
-const loadDynamicRoutes = async () => {
+const loadPathsForSensorRoutes = async () => {
     try {
+        const prefixes = ["dashboard", "groups", "statistics"];
         const response = await axiosInstance.get('/meta-data/groups');
 
         response.forEach(group => {
-            router.addRoute({
-                path: `/${group.group_value}`,
-                name: `${group.group_name}Group`,
-                component: Group,
-                meta: { requiresAuth: false },
-                props: () => ({
-                    sensors: group.sensors,
-                    groupValue: group.group_value
-                }),
-            });
-            group.sensors.forEach(sensor => {
+            prefixes.forEach(prefix => {
                 router.addRoute({
-                    path: `/${group.group_value}/${sensor.type}`,
-                    name: sensor.display_name,
-                    component: Sensor,
+                    path: `/${prefix}/${group.group_value}`,
+                    name: `${group.group_name}${prefix.charAt(0).toUpperCase() + prefix.slice(1)}Group`,
+                    component: Group,
                     meta: { requiresAuth: false },
                     props: () => ({
-                        type: sensor.type,
-                        displayName: sensor.display_name
+                        sensors: group.sensors,
+                        groupValue: group.group_value
                     }),
+                });
+
+                group.sensors.forEach(sensor => {
+                    router.addRoute({
+                        path: `/${prefix}/${group.group_value}/${sensor.type}`,
+                        name: `${sensor.display_name}${prefix.charAt(0).toUpperCase() + prefix.slice(1)}`,
+                        component: Sensor,
+                        meta: { requiresAuth: false },
+                        props: () => ({
+                            type: sensor.type,
+                            displayName: sensor.display_name
+                        }),
+                    });
                 });
             });
         });
     } catch (error) {
         console.error('Failed to load sensor groups:', error);
     }
-}
+};
 
-loadDynamicRoutes()
+loadPathsForSensorRoutes()
 
 export default router;

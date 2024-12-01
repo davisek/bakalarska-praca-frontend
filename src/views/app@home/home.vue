@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import ASensorReadings from "@/components/a-sensor-readings.vue";
 import axiosInstance from "@/plugins/axios";
+import ABreadcrumb from "@/components/a-breadcrumb.vue";
 import {onMounted, ref} from "vue";
+import {RouterLink} from "vue-router";
 
 const groups = ref({});
 
@@ -20,20 +22,24 @@ onMounted(async () => {
 </script>
 
 <template>
+  <ABreadcrumb/>
+
   <div>
-    <h1 class="text-3xl font-bold text-center mb-6">Welcome to the Home Page</h1>
+    <div v-for="group in groups" :key="group.group_value" class="p-10">
+      <h2 v-if="group.sensors.length !== 0" class="text-3xl font-bold mb-4">{{ group.group_name }}</h2>
 
-    <div v-for="group in groups" :key="group.group_value" class="mb-6">
-      <h2 v-if="group.sensors.length !== 0" class="text-2xl font-bold mb-6">{{ group.group_name }}</h2>
-
-      <div class="grid grid-cols-3 gap-6" v-if="group.sensors.length">
-        <ASensorReadings
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-14">
+        <router-link
             v-for="sensor in group.sensors"
             :key="sensor.type"
-            :type="sensor.type"
-            :display-name="sensor.display_name"
-            class="bg-gray-800 text-white p-4 rounded shadow"
-        />
+            :to="`/dashboard/${group.group_value}/${sensor.type}`"
+            class="p-4 rounded-lg shadow-xl hover:shadow-xl transition-transform duration-300 hover:scale-105 border-b-2 border-b-purple-500 block"
+        >
+          <ASensorReadings
+              :type="sensor.type"
+              :display-name="sensor.display_name"
+          />
+        </router-link>
       </div>
     </div>
   </div>

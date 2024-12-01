@@ -62,7 +62,7 @@ const unsubscribeFromMQTTTopics = () => {
 watch(() => props.type, () => {
   fetchSensorData();
   unsubscribeFromMQTTTopics();
-  subscribeToMQTTTopics()
+  subscribeToMQTTTopics();
 });
 
 onMounted(async () => {
@@ -77,13 +77,13 @@ onUnmounted(() => {
 
 <template>
   <div>
-    <div v-if="sensorData.error">{{ sensorData.error }}</div>
+    <div class="text-center p-3" v-if="sensorData.error">{{ sensorData.error }}</div>
     <div v-else>
       <div>
-        <h3 class="text-xl font-bold mb-2">Current Data</h3>
+        <h3 class="text-xl font-bold mb-2">{{ props.displayName }} Data</h3>
         <p>{{ props.displayName }}: {{ sensorData.value }} {{ sensorData.symbol }}</p>
         <p>
-          Recorded At:
+          Recorded at:
           <span v-if="sensorData.recordedAt">
             {{ formatDateTime(sensorData.recordedAt) }}
           </span>

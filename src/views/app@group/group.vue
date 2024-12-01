@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { RouterLink } from 'vue-router';
+import ABreadcrumb from "@/components/a-breadcrumb.vue";
+import {RouterLink, useRoute} from 'vue-router';
 
 interface Sensor {
   type: string;
@@ -16,18 +17,31 @@ const props = defineProps({
     required: true,
   },
 });
-console.log(props)
+
+const route = useRoute();
 </script>
 
 <template>
-  <div>
-    <h1 class="mb-4 text-3xl">Sensors</h1>
-    <div v-for="sensor in sensors" :key="sensor.type">
+  <ABreadcrumb/>
+
+  <div class="p-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-14">
+    <div
+        v-for="sensor in sensors"
+        :key="sensor.type"
+        class="rounded-lg shadow-lg hover:shadow-lg hover:scale-105 transition-transform"
+    >
       <router-link
-          :to="`/${props.groupValue}/${sensor.type}`"
-          class="block px-4 py-2 hover:bg-gray-600 hover:text-white hover:rounded-md"
+          :to="`${route.path}/${sensor.type}`"
+          class="block hover:outline hover:outline-purple-500 hover:outline-1 rounded-lg"
       >
-        {{ sensor.display_name }}
+        <div
+            class="w-full min-h-48 bg-cover bg-center rounded-t-lg"
+            :style="`background-image: url('https://media.istockphoto.com/id/1323823418/photo/low-angle-view-thermometer-on-blue-sky-with-sun-shining.jpg?s=612x612&w=0&k=20&c=LwLCGF902C-DNwKgCMCR12zFnB4g1INWzlk1JPOidRk=');`"
+        ></div>
+
+        <div class="p-4 text-center font-bold text-lg rounded-b-lg">
+          {{ sensor.display_name }}
+        </div>
       </router-link>
     </div>
   </div>
