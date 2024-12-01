@@ -38,7 +38,10 @@ const loadDynamicRoutes = async () => {
                 name: `${group.group_name}Group`,
                 component: Group,
                 meta: { requiresAuth: false },
-                props: { sensors: group.sensors }
+                props: () => ({
+                    sensors: group.sensors,
+                    groupValue: group.group_value
+                }),
             });
             group.sensors.forEach(sensor => {
                 router.addRoute({

@@ -2,6 +2,7 @@
 import {onMounted, onUnmounted, reactive, watch} from 'vue';
 import axiosInstance from '@/plugins/axios';
 import mqttClient from '@/plugins/mqtt';
+import {formatDateTime} from "@/utils/dateUtil.ts";
 
 const props = defineProps({
   type: {
@@ -79,9 +80,17 @@ onUnmounted(() => {
     <div v-if="sensorData.error">{{ sensorData.error }}</div>
     <div v-else>
       <div>
-        <h3 class="text-xl font-bold mb-2">{{ props.displayName }} Data</h3>
+        <h3 class="text-xl font-bold mb-2">Current Data</h3>
         <p>{{ props.displayName }}: {{ sensorData.value }} {{ sensorData.symbol }}</p>
-        <p>Recorded At: {{ sensorData.recordedAt }}</p>
+        <p>
+          Recorded At:
+          <span v-if="sensorData.recordedAt">
+            {{ formatDateTime(sensorData.recordedAt) }}
+          </span>
+          <span v-else>
+            No data available
+          </span>
+        </p>
       </div>
     </div>
   </div>

@@ -3,6 +3,7 @@ import {ref, onMounted, watch, reactive} from 'vue';
 import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement } from 'chart.js';
 import { Line } from 'vue-chartjs';
 import axiosInstance from "@/plugins/axios";
+import {formatDateTime} from "@/utils/dateUtil.ts";
 
 ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, LinearScale, CategoryScale);
 
@@ -38,8 +39,8 @@ const timeRanges = [
 const fromDate = ref('');
 const toDate = ref('');
 const selectedRange = ref(null);
-
 const symbol = ref('');
+
 const chartLabels = ref<string[]>([]);
 const chartData = ref<number[]>([]);
 const chartOptions = ref({});
@@ -80,7 +81,7 @@ const loadChartData = async () => {
 
     const response = await axiosInstance.get('/sensor-readings/collection/' + props.type, { params });
 
-    chartLabels.value = response.map((item: any) => item.recorded_at);
+    chartLabels.value = response.map((item: any) => formatDateTime(item.recorded_at));
     chartData.value = response.map((item: any) =>
         item.value !== null ? parseFloat(item.value.toFixed(2)) : null
     );
@@ -127,38 +128,42 @@ watch(() => props.type, () => {
 
 <template>
   <div>
-    <h3 class="text-xl font-bold mb-4 text-center">{{ props.displayName }} Sensor Graph</h3>
-    <div class="inputs mb-4 flex justify-center gap-4">
-      <label for="from">From:</label>
-      <input
-          type="date"
-          id="from"
-          v-model="fromDate"
-          class="border p-2 rounded"
-      />
+    <h3 class="text-xl font-bold mb-4 text-center">Sensor Graph</h3>
 
-      <label for="to">To:</label>
-      <input
-          type="date"
-          id="to"
-          v-model="toDate"
-          class="border p-2 rounded"
-      />
-    </div>
-
-    <div class="mb-4 gap-5 grid grid-cols-9">
+    <div class="mb-4 gap-4 grid grid-cols-9">
       <button
           v-for="(range, index) in timeRanges"
           :key="index"
           @click="setTimeRange(range.value)"
           :class="[
-            'px-4 py-2 bg-blend-darken rounded-lg shadow-md hover:bg-amber-900 focus:outline-none transition',
+            'p-2 bg-blend-darken rounded-lg shadow-md hover:bg-amber-900 focus:outline-none transition',
             selectedRange === range.value ? 'bg-amber-800 text-white' : 'bg-blend-darken text-white'
           ]"
       >
         {{ range.label }}
       </button>
     </div>
+    <div class="mb-4 flex justify-center gap-4">
+      <div>
+        <label class="mr-3" for="from">From:</label>
+        <input
+            type="date"
+            id="from"
+            v-model="fromDate"
+            class="border-b p-2 rounded"
+        />
+      </div>
+      <div>
+        <label class="mr-3" for="to">To:</label>
+        <input
+            type="date"
+            id="to"
+            v-model="toDate"
+            class="border-b p-2 rounded"
+        />
+      </div>
+    </div>
+
 
     <div v-if="errorMessage" class="text-red-500 text-center">
       {{ errorMessage }}

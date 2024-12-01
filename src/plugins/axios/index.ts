@@ -8,7 +8,12 @@ const axiosInstance: AxiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.response.use(
-    response => response.data.data ?? response.data,
+    response => {
+        if (response.data && 'data' in response.data && 'current_page' in response.data) {
+            return response.data;
+        }
+        return response.data.data ?? response.data;
+    },
     error => Promise.reject(error)
 );
 
