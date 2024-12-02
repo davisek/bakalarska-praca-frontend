@@ -8,7 +8,7 @@ import ANavbar from "@/components/a-navbar.vue";
     <ANavbar class="sticky top-0 h-screen w-1/6 bg-gray-800 text-gray-300"/>
 
     <!-- Main content -->
-    <div class="w-5/6 p-10 min-h-100 bg-gray-900 text-gray-100">
+    <div class="w-5/6 p-10 min-h-100 gradient-background text-gray-100 bg-cover">
       <router-view />
     </div>
   </div>

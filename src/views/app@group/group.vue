@@ -28,7 +28,7 @@ const route = useRoute();
     <div
         v-for="sensor in sensors"
         :key="sensor.type"
-        class="rounded-lg shadow-lg hover:shadow-lg hover:scale-105 transition-transform"
+        class="rounded-lg shadow-box hover:scale-105 transition-transform"
     >
       <router-link
           :to="`${route.path}/${sensor.type}`"

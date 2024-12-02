@@ -33,7 +33,7 @@ onMounted(async () => {
             v-for="sensor in group.sensors"
             :key="sensor.type"
             :to="`/dashboard/${group.group_value}/${sensor.type}`"
-            class="p-4 rounded-lg shadow-xl hover:shadow-xl transition-transform duration-300 hover:scale-105 border-b-2 border-b-purple-500 block"
+            class="p-4 rounded-lg shadow-box transition-transform duration-300 hover:scale-105 block"
         >
           <ASensorReadings
               :type="sensor.type"

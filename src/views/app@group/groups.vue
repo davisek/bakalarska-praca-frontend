@@ -31,7 +31,7 @@ const route = useRoute();
       <div
           v-for="group in groupsWithSensors"
           :key="group.group_value"
-          class="flex flex-col lg:flex-row items-stretch bg-gray-800 rounded-lg shadow-lg overflow-hidden"
+          class="flex flex-col lg:flex-row items-stretch bg-gray-800 rounded-lg shadow-box overflow-hidden"
       >
         <div
             class="lg:w-1/3 w-full min-h-40 relative bg-cover bg-center hover:text-purple-300"
