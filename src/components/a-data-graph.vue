@@ -9,12 +9,13 @@ import {formatDateTime} from "@/utils/dateUtil.ts";
 ChartJS.register(CrosshairPlugin, Title, Tooltip, Legend, LineElement, PointElement, LinearScale, CategoryScale);
 
 const props = defineProps({
-  type: {
-    type: String,
-    required: true,
-  },
-  displayName: {
-    type: String,
+  sensor: {
+    type: Object as () => {
+      sensor_name: string;
+      type: string;
+      display_name: string;
+      icon_path?: string;
+    },
     required: true,
   },
 });
@@ -103,7 +104,7 @@ const loadChartData = async () => {
       params.to = toDate.value;
     }
 
-    const response = await axiosInstance.get('/sensor-readings/collection/' + props.type, { params });
+    const response = await axiosInstance.get('/sensor-readings/collection/' + props.sensor.type, { params });
 
     chartLabels.value = response.map((item: any) => formatDateTime(item.recorded_at));
     chartData.value = response.map((item: any) =>
@@ -167,8 +168,18 @@ const loadChartData = async () => {
           ticks: {
             maxTicksLimit: 10,
             autoSkip: true,
+            font: {
+              size: 14,
+            },
           },
         },
+        y: {
+          ticks: {
+            font: {
+              size: 14,
+            },
+          },
+        }
       },
       interaction: {
         mode: 'index',
@@ -191,7 +202,7 @@ onMounted(async () => {
 watch([fromDate, toDate], () => {
     loadChartData();
 });
-watch(() => props.type, () => {
+watch(() => props.sensor.type, () => {
   timeStartSetup();
   loadChartData();
 });
@@ -203,7 +214,7 @@ watch(() => props.type, () => {
 
     <!-- Hamburger menu -->
     <div class="lg:hidden flex justify-between items-center mb-4">
-      <h2 class="text-lg font-semibold text-white">Filters</h2>
+      <h2 class="text-lg font-semibold">Filters</h2>
       <button
           @click="isMenuOpen = !isMenuOpen"
           :class="[
@@ -236,14 +247,14 @@ watch(() => props.type, () => {
           {{ range.label }}
         </button>
       </div>
-      <div class="lg:flex gap-4 justify-center">
+      <div class="lg:flex gap-4 justify-center font-semibold">
         <div class="flex flex-col lg:flex-row lg:items-center lg:mb-0 mb-4 gap-2 lg:flex-none">
           <label class="font-medium" for="from">From:</label>
           <input
               type="date"
               id="from"
               v-model="fromDate"
-              class="border p-2 rounded-lg shadow-box focus:ring focus:ring-purple-400 focus:outline-none bg-gray-800 text-white"
+              class="border p-2 rounded-lg shadow-box focus:ring focus:ring-purple-400 focus:outline-none bg-gray-800"
           />
         </div>
 
@@ -253,7 +264,7 @@ watch(() => props.type, () => {
               type="date"
               id="to"
               v-model="toDate"
-              class="border p-2 rounded-lg shadow-box focus:ring focus:ring-purple-400 focus:outline-none bg-gray-800 text-white"
+              class="border p-2 rounded-lg shadow-box focus:ring focus:ring-purple-400 focus:outline-none bg-gray-800"
           />
         </div>
       </div>
@@ -265,13 +276,13 @@ watch(() => props.type, () => {
     </div>
 
     <Line
-        class="mb-6 p-6"
+        class="mb-6 p-6 shadow-box"
         v-else
         :data="{
           labels: chartLabels,
           datasets: [
             {
-              label: props.displayName,
+              label: props.sensor.display_name,
               data: chartData,
               borderColor: 'rgba(75, 192, 192, 1)',
               backgroundColor: 'rgba(75, 192, 192, 0.2)',

@@ -9,7 +9,7 @@ const errorMessage = ref<string | null>(null);
 
 const fetchSensorData = async () => {
   try {
-    const response = await axiosInstance.get('/meta-data/groups');
+    const response = await axiosInstance.get('/sensor-groups');
 
     groupsWithSensors.value = response
   } catch (err) {

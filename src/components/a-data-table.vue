@@ -4,12 +4,13 @@ import axiosInstance from "@/plugins/axios";
 import {formatDateTime} from "@/utils/dateUtil.ts";
 
 const props = defineProps({
-  type: {
-    type: String,
-    required: true,
-  },
-  displayName: {
-    type: String,
+  sensor: {
+    type: Object as () => {
+      sensor_name: string;
+      type: string;
+      display_name: string;
+      icon_path?: string;
+    },
     required: true,
   },
 });
@@ -107,7 +108,7 @@ const fetchRawData = async () => {
     if (fromDate.value) params.from = fromDate.value;
     if (toDate.value) params.to = toDate.value;
 
-    const response = await axiosInstance.get(`/sensor-readings/collection/${props.type}/raw`, { params });
+    const response = await axiosInstance.get(`/sensor-readings/collection/${props.sensor.type}/raw`, { params });
 
     tableData.value = calculatePercentageChange(response.data, sortDirection.value);
     paginationMeta.value = {
@@ -127,7 +128,7 @@ onMounted(async () => {
 });
 
 watch([fromDate, toDate], () => fetchRawData());
-watch(() => props.type, () => {
+watch(() => props.sensor.type, () => {
   timeStartSetup()
   fetchRawData();
 });
@@ -140,7 +141,7 @@ watch(currentPage, () => fetchRawData());
 
     <!-- Hamburger menu -->
     <div class="lg:hidden flex justify-between items-center mb-4">
-      <h2 class="text-lg font-semibold text-white">Filters</h2>
+      <h2 class="text-lg font-semibold">Filters</h2>
       <button
           @click="isMenuOpen = !isMenuOpen"
           class="p-2 rounded-md bg-purple-500 hover:bg-purple-600 shadow-box"
@@ -170,7 +171,7 @@ watch(currentPage, () => fetchRawData());
           {{ range.label }}
         </button>
       </div>
-      <div class="mb-4 lg:flex gap-4 justify-between font-semibold">
+      <div class="mb-4 xl:flex gap-4 justify-between font-semibold">
         <div class="md:flex gap-4 justify-center">
           <button @click="setSorting('value')" class="p-2 rounded shadow-box bg-blend-darken hover:bg-gray-800 lg:mb-0 mb-4">
             Sort by Value
@@ -185,14 +186,14 @@ watch(currentPage, () => fetchRawData());
           </span>
           </button>
         </div>
-        <div class="lg:flex gap-4 items-center">
+        <div class="lg:flex gap-4 justify-center">
           <div class="flex flex-col lg:flex-row lg:items-center lg:mb-0 mb-4 gap-2 lg:flex-none">
             <label class="font-medium" for="from">From:</label>
             <input
                 type="date"
                 id="from"
                 v-model="fromDate"
-                class="border p-2 rounded-lg shadow-box focus:ring focus:ring-purple-400 focus:outline-none bg-gray-800 text-white"
+                class="border p-2 rounded-lg shadow-box focus:ring focus:ring-purple-400 focus:outline-none bg-gray-800"
             />
           </div>
 
@@ -202,7 +203,7 @@ watch(currentPage, () => fetchRawData());
                 type="date"
                 id="to"
                 v-model="toDate"
-                class="border p-2 rounded-lg shadow-box focus:ring focus:ring-purple-400 focus:outline-none bg-gray-800 text-white"
+                class="border p-2 rounded-lg shadow-box focus:ring focus:ring-purple-400 focus:outline-none bg-gray-800"
             />
           </div>
         </div>
@@ -229,7 +230,7 @@ watch(currentPage, () => fetchRawData());
         </svg>
       </button>
     </div>
-    <div class="text-lg lg:px-20 px-2 mt-4">
+    <div class="text-lg lg:px-20 px-2 py-6 mt-4 shadow-box">
       <div class="grid grid-cols-3 mb-2">
         <h3 class="text-left">Value</h3>
         <h3 class="text-center">Recorded at</h3>

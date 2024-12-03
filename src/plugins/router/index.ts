@@ -47,7 +47,7 @@ const router = createRouter({
 const loadPathsForSensorRoutes = async () => {
     try {
         const prefixes = ["dashboard", "groups", "statistics"];
-        const response = await axiosInstance.get('/meta-data/groups');
+        const response = await axiosInstance.get('/sensor-groups');
 
         response.forEach(group => {
             prefixes.forEach(prefix => {
@@ -57,8 +57,7 @@ const loadPathsForSensorRoutes = async () => {
                     component: Group,
                     meta: { requiresAuth: false },
                     props: () => ({
-                        sensors: group.sensors,
-                        groupValue: group.group_value
+                        sensors: group.sensors
                     }),
                 });
 
@@ -69,8 +68,7 @@ const loadPathsForSensorRoutes = async () => {
                         component: Sensor,
                         meta: { requiresAuth: false },
                         props: () => ({
-                            type: sensor.type,
-                            displayName: sensor.display_name
+                            sensor: sensor,
                         }),
                     });
                 });
