@@ -31,7 +31,7 @@ const fetchSensorData = async () => {
     sensorData.value = response.value;
     sensorData.symbol = response.symbol;
     sensorData.recordedAt = response.recorded_at;
-
+    console.log(sensorData)
     sensorData.error = null;
   } catch (err) {
     sensorData.error = `Failed to load ${props.sensor.type} data`;
@@ -51,6 +51,7 @@ const handleMQTTMessage = (topic: string, message: Buffer) => {
 const subscribeToMQTTTopics = () => {
   mqttClient.subscribe(`${props.sensor.type}-data`, (err) => {
     if (!err) console.log('Subscribed to sensor');
+    sensorData.error = null;
   });
 
   mqttClient.on('message', handleMQTTMessage);

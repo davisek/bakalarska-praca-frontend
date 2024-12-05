@@ -17,6 +17,7 @@ const props = defineProps({
   },
 });
 
+console.log(props.sensor)
 const sections = [
   {
     label: "Sensor Readings",

@@ -26,7 +26,7 @@ const route = useRoute();
   <ABreadcrumb/>
 
   <div class="p-10">
-    <div v-for="group in groups" :key="group.group_value">
+    <div v-for="group in groups" :key="group.group_value" class="mb-8">
       <h2 v-if="group.sensors.length !== 0" class="text-3xl font-bold mb-4">{{ group.group_name }}</h2>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-14">
