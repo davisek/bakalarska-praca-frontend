@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {onMounted, reactive, ref, watch} from "vue";
+import {computed, onMounted, reactive, ref, watch} from "vue";
 import axiosInstance from "@/plugins/axios";
 import {formatDateTime} from "@/utils/dateUtil.ts";
 
@@ -45,6 +45,14 @@ const sortDirection = ref<string>('desc');
 
 const tableData = ref<any[]>([]);
 const errorMessage = ref<string | null>(null);
+
+const maxDate = computed(() => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+});
 
 const timeStartSetup = () => {
   const now = new Date();
@@ -109,13 +117,18 @@ const fetchRawData = async () => {
     if (toDate.value) params.to = toDate.value;
 
     const response = await axiosInstance.get(`/sensor-readings/collection/${props.sensor.type}/raw`, { params });
-
-    tableData.value = calculatePercentageChange(response.data, sortDirection.value);
-    paginationMeta.value = {
-      current_page: response.current_page,
-      last_page: response.last_page,
-      total: response.total,
-    };
+    if (response.data.length !== 0) {
+      tableData.value = calculatePercentageChange(response.data, sortDirection.value);
+      paginationMeta.value = {
+        current_page: response.current_page,
+        last_page: response.last_page,
+        total: response.total,
+      };
+      errorMessage.value = null;
+    } else {
+      errorMessage.value = 'There are no data for this date range.';
+      tableData.value = [];
+    }
   } catch (error) {
     errorMessage.value = 'Failed to load data. Please try again.';
     console.error(error);
@@ -192,6 +205,7 @@ watch(currentPage, () => fetchRawData());
             <input
                 type="date"
                 id="from"
+                @click="selectedRange = null"
                 v-model="fromDate"
                 class="border p-2 rounded-lg shadow-box focus:ring focus:ring-purple-400 focus:outline-none bg-gray-800"
             />
@@ -203,6 +217,8 @@ watch(currentPage, () => fetchRawData());
                 type="date"
                 id="to"
                 v-model="toDate"
+                @click="selectedRange = null"
+                :max="maxDate"
                 class="border p-2 rounded-lg shadow-box focus:ring focus:ring-purple-400 focus:outline-none bg-gray-800"
             />
           </div>
@@ -235,6 +251,9 @@ watch(currentPage, () => fetchRawData());
         <h3 class="text-left">Value</h3>
         <h3 class="text-center">Recorded at</h3>
         <h3 class="text-right">Percentage change</h3>
+      </div>
+      <div v-if="errorMessage" class="mt-6 text-red-500 text-center">
+        {{ errorMessage }}
       </div>
       <div class="grid grid-cols-3 p-2 border-b border-b-cyan-300" v-for="(item, index) in tableData" :key="index">
         <div class="text-left">{{ item.value }} {{ item.symbol }}</div>

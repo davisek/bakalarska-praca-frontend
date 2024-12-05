@@ -5,6 +5,7 @@ import Group from "@/views/app@group/group.vue";
 import axiosInstance from "@/plugins/axios";
 import Statistics from "@/views/app@statistics/statistics.vue";
 import Groups from "@/views/app@group/groups.vue";
+import {alpha} from "@vuelidate/validators";
 
 const routes: Array<RouteRecordRaw> = [
     {

@@ -78,7 +78,7 @@ onUnmounted(() => {
 
 <template>
   <div>
-    <div class="text-center p-3" v-if="sensorData.error">{{ sensorData.error }}</div>
+    <div class="text-center p-3 text-red-500" v-if="sensorData.error">{{ sensorData.error }}</div>
     <div v-else>
       <div class="lg:flex flex-none justify-center lg:ml-2 ml-0">
         <div class="w-full lg:w-5/6">

@@ -105,89 +105,92 @@ const loadChartData = async () => {
     }
 
     const response = await axiosInstance.get('/sensor-readings/collection/' + props.sensor.type, { params });
+    if (response.length !== 0) {
+      chartLabels.value = response.map((item: any) => formatDateTime(item.recorded_at));
+      chartData.value = response.map((item: any) =>
+          item.value !== null ? parseFloat(item.value.toFixed(2)) : null
+      );
+      symbol.value = response[0]?.symbol || '';
 
-    chartLabels.value = response.map((item: any) => formatDateTime(item.recorded_at));
-    chartData.value = response.map((item: any) =>
-        item.value !== null ? parseFloat(item.value.toFixed(2)) : null
-    );
-    symbol.value = response[0]?.symbol || '';
+      statistics.avg = parseFloat(
+          (chartData.value.reduce((sum, value) => sum + (value as number), 0) / chartData.value.length).toFixed(2)
+      );
+      statistics.min = Math.min(...(chartData.value as number[]));
+      statistics.max = Math.max(...(chartData.value as number[]));
+      calculatePercentageDifference(chartData.value);
 
-    statistics.avg = parseFloat(
-        (chartData.value.reduce((sum, value) => sum + (value as number), 0) / chartData.value.length).toFixed(2)
-    );
-    statistics.min = Math.min(...(chartData.value as number[]));
-    statistics.max = Math.max(...(chartData.value as number[]));
-    calculatePercentageDifference(chartData.value);
-
-    chartOptions.value = {
-      responsive: true,
-      plugins: {
-        legend: {
-          display: true,
-          onClick: null,
-        },
-        crosshair: {
-          line: {
-            color: 'rgba(216, 180, 254, 0.75)',
-            width: 1,
+      chartOptions.value = {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: true,
+            onClick: null,
           },
-          snap: {
-            enabled: true
-          },
-          zoom: {
-            enabled: false
-          }
-        },
-        tooltip: {
-          enabled: true,
-          callbacks: {
-            label: function (context: any) {
-              const value = context.raw || '';
-              return `${value} ${symbol.value}`;
+          crosshair: {
+            line: {
+              color: 'rgba(216, 180, 254, 0.75)',
+              width: 1,
+            },
+            snap: {
+              enabled: true
+            },
+            zoom: {
+              enabled: false
             }
           },
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
-          bodyFont: {
-            size: 14,
-            weight: 'bold',
-          },
-          titleFont: {
-            size: 14,
-            weight: 'bold',
-          },
-          padding: 12,
-          cornerRadius: 8,
-          boxPadding: 8,
-        },
-      },
-      scales: {
-        x: {
-          grid: {
-            display: true,
-          },
-          ticks: {
-            maxTicksLimit: 10,
-            autoSkip: true,
-            font: {
-              size: 14,
+          tooltip: {
+            enabled: true,
+            callbacks: {
+              label: function (context: any) {
+                const value = context.raw || '';
+                return `${value} ${symbol.value}`;
+              }
             },
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            bodyFont: {
+              size: 14,
+              weight: 'bold',
+            },
+            titleFont: {
+              size: 14,
+              weight: 'bold',
+            },
+            padding: 12,
+            cornerRadius: 8,
+            boxPadding: 8,
           },
         },
-        y: {
-          ticks: {
-            font: {
-              size: 14,
+        scales: {
+          x: {
+            grid: {
+              display: true,
+            },
+            ticks: {
+              maxTicksLimit: 10,
+              autoSkip: true,
+              font: {
+                size: 14,
+              },
             },
           },
-        }
-      },
-      interaction: {
-        mode: 'index',
-        intersect: false,
-      },
-    };
+          y: {
+            ticks: {
+              font: {
+                size: 14,
+              },
+            },
+          }
+        },
+        interaction: {
+          mode: 'index',
+          intersect: false,
+        },
+      };
 
-    errorMessage.value = null;
+      errorMessage.value = null;
+    } else {
+      errorMessage.value = 'There are no data for this date range.';
+    }
   } catch (error) {
     errorMessage.value = 'Failed to load data. Please try again.';
     console.error(error);
@@ -293,7 +296,7 @@ watch(() => props.sensor.type, () => {
     />
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-10">
+  <div v-if="errorMessage === null" class="grid grid-cols-1 md:grid-cols-4 gap-10">
     <div class="flex justify-center items-center py-4 px-16 bg-blend-darken rounded-lg shadow-box">
       <div class="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-blue-600">

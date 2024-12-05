@@ -63,7 +63,7 @@ const toggleSection = (section) => {
             </svg>
           </span>
         </button>
-        <div class="flex justify-center items-center h-full">
+        <div class="flex justify-center h-full mt-12">
           <transition name="fade-down" mode="out-in">
             <div
                 v-show="sections[0].visible.value"
@@ -96,7 +96,7 @@ const toggleSection = (section) => {
           </span>
         </button>
         <transition name="fade-down" mode="out-in">
-          <div v-show="sections[2].visible.value" class="mt-2 border p-4 rounded-md">
+          <div v-show="sections[2].visible.value" class="mt-4 border p-4 rounded-md">
             <component :is="sections[2].component" :sensor="props.sensor" />
           </div>
         </transition>
@@ -122,7 +122,7 @@ const toggleSection = (section) => {
         </span>
       </button>
       <transition name="fade-down" mode="out-in">
-        <div v-show="sections[1].visible.value" class="mt-2 border gradient-border p-4 rounded-md">
+        <div v-show="sections[1].visible.value" class="mt-4 border gradient-border p-4 rounded-md">
           <component :is="sections[1].component" :sensor="props.sensor" />
         </div>
       </transition>
