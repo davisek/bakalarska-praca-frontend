@@ -43,11 +43,10 @@ onMounted(() => {
         <div>
           <MenuButton class="relative flex rounded-full bg-gray-800 text-lg focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
             <span class="sr-only">Open user menu</span>
-            <img
-                class="h-12 w-12 rounded-full"
-                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                alt=""
-            />
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-9">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+            </svg>
+
           </MenuButton>
         </div>
         <transition enter-active-class="transition ease-out duration-100" enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100" leave-active-class="transition ease-in duration-75" leave-from-class="transform opacity-100 scale-100" leave-to-class="transform opacity-0 scale-95">
@@ -65,14 +64,14 @@ onMounted(() => {
         </transition>
       </Menu>
       <div v-else-if="!isAuthenticated" class="flex gap-4 justify-center items-center">
-        <div class="transition-transform duration-300 hover:scale-105 rounded-lg hover:bg-purple-600 shadow-box">
+        <div class="transition-transform duration-300 hover:scale-105 rounded-lg bg-purple-500 hover:bg-purple-600 shadow-box">
           <button class="py-2 px-4"
                   @click="login()"
           >
             Login
           </button>
         </div>
-        <div class="transition-transform duration-300 hover:scale-105 rounded-lg hover:bg-purple-600 shadow-box">
+        <div class="transition-transform duration-300 hover:scale-105 rounded-lg bg-purple-500 hover:bg-purple-600 shadow-box">
           <button class="py-2 px-4"
                   @click="login()"
           >

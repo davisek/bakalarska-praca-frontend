@@ -34,8 +34,8 @@ const route = useRoute();
           class="flex flex-col lg:flex-row items-stretch bg-gray-800 rounded-lg shadow-box overflow-hidden"
       >
         <div
-            class="lg:w-1/3 w-full min-h-40 relative bg-cover bg-center hover:text-purple-300"
-            :style="`background-image: url(https://www.unimier.sk/sub/unimier.sk/shop/product/obyvacka-flabo-782.jpg)`"
+            class="lg:w-1/3 w-full min-h-40 relative bg-cover bg-center hover:text-purple-300 lg:mr-5"
+            :style="`background-image: url(${group.image_path});`"
         >
           <router-link :to="`${route.path}/${group.group_value}`">
             <div class="absolute inset-0 bg-gray-900 bg-opacity-75"></div>
@@ -46,15 +46,20 @@ const route = useRoute();
           </router-link>
         </div>
 
-        <div class="flex flex-col items-start text-lg lg:w-2/3 w-full p-4">
-          <div class="pl-4 py-4 flex-1">
-            <ul class="list-disc list-inside">
-              <li v-for="sensor in group.sensors" :key="sensor.type">
-                {{ sensor.display_name }}
-              </li>
-            </ul>
+        <div class="xl:flex xl:flex-wrap justify-center gap-4 lg:pr-5">
+          <div v-for="sensor in group.sensors" :key="sensor.type" class="flex justify-center shadow-box items-center gap-4 p-4 bg-gray-700 my-5 lg:mx-0 mx-5 rounded-lg text-center">
+            <img
+                :src="sensor.icon_path"
+                alt=""
+                class="w-10 h-10 object-cover rounded-md"
+            />
+            <div>
+              <h3 class="text-lg font-bold">{{ sensor.display_name }}</h3>
+              <p class="text-sm text-gray-400">{{ sensor.type }}</p>
+            </div>
           </div>
         </div>
+
       </div>
     </div>
 
