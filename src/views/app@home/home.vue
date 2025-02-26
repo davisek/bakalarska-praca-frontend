@@ -4,12 +4,14 @@ import axiosInstance from "@/plugins/axios";
 import ABreadcrumb from "@/components/a-breadcrumb.vue";
 import {onMounted, ref} from "vue";
 import {RouterLink, useRoute} from "vue-router";
+import { SensorGroup } from '@/types/index';
 
-const groups = ref({});
+const groups = ref<SensorGroup[]>([]);
 
 const fetchSensors = async () => {
   try {
-    const response = await axiosInstance.get('sensor-groups');
+    const response = await axiosInstance.get<SensorGroup[]>('sensor-groups');
+
     groups.value = response;
   } catch (err) {
     console.error(err);
@@ -25,7 +27,7 @@ const route = useRoute();
 <template>
   <ABreadcrumb/>
 
-  <div class="p-10">
+  <div class="p-6">
     <div v-for="group in groups" :key="group.group_value" class="mb-8">
       <h2 v-if="group.sensors.length !== 0" class="text-3xl font-bold mb-4">{{ group.group_name }}</h2>
 

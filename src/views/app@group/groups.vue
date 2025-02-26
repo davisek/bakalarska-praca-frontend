@@ -3,15 +3,16 @@ import axiosInstance from "@/plugins/axios";
 import {onMounted, ref} from "vue";
 import ABreadcrumb from "@/components/a-breadcrumb.vue";
 import {RouterLink, useRoute} from "vue-router";
+import { SensorGroup } from '@/types';
 
-const groupsWithSensors = ref<any[]>([]);
+const groupsWithSensors = ref<SensorGroup[]>([]);
 const errorMessage = ref<string | null>(null);
 
 const fetchSensorData = async () => {
   try {
-    const response = await axiosInstance.get('/sensor-groups');
+    const response = await axiosInstance.get<SensorGroup[]>('/sensor-groups');
 
-    groupsWithSensors.value = response
+    groupsWithSensors.value = response;
   } catch (err) {
     errorMessage.value = 'Failed to load data. Please try again.';
     console.error(err);
@@ -26,7 +27,7 @@ const route = useRoute();
 <template>
   <ABreadcrumb/>
 
-  <div class="p-10">
+  <div class="p-6">
     <div class="grid gap-6">
       <div
           v-for="group in groupsWithSensors"
@@ -47,7 +48,7 @@ const route = useRoute();
         </div>
 
         <div class="xl:flex xl:flex-wrap justify-center gap-4 lg:pr-5">
-          <div v-for="sensor in group.sensors" :key="sensor.type" class="flex justify-center shadow-box items-center gap-4 p-4 bg-gray-700 my-5 lg:mx-0 mx-5 rounded-lg text-center">
+          <div v-for="sensor in group.sensors" :key="sensor.type" class="flex justify-center shadow-box items-center gap-4 p-4 pr-7 bg-gray-700 my-5 lg:mx-0 mx-5 rounded-lg text-center">
             <img
                 :src="sensor.icon_path"
                 alt=""

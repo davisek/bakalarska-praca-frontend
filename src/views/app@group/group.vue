@@ -1,13 +1,7 @@
 <script setup lang="ts">
 import ABreadcrumb from "@/components/a-breadcrumb.vue";
 import {RouterLink, useRoute} from 'vue-router';
-
-interface Sensor {
-  sensor_name: string;
-  type: string;
-  display_name: string;
-  image_path: string;
-}
+import { Sensor } from '@/types';
 
 const props = defineProps({
   sensors: {
@@ -22,9 +16,9 @@ const route = useRoute();
 <template>
   <ABreadcrumb/>
 
-  <div class="p-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-14">
+  <div class="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-14">
     <div
-        v-for="sensor in sensors"
+        v-for="sensor in props.sensors"
         :key="sensor.type"
         class="rounded-lg shadow-box hover:scale-105 transition-transform"
     >

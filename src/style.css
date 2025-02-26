@@ -36,7 +36,7 @@ body {
 }
 
 .shadow-box {
-  -webkit-box-shadow: 5px 5px 10px 0 rgba(0,0,0,0.5);
-  -moz-box-shadow: 5px 5px 10px 0 rgba(0,0,0,0.5);
-  box-shadow: 3px 3px 10px 0 rgba(0,0,0,0.4);
+  -webkit-box-shadow: 2px 3px 6px 1px rgba(0, 0, 0, 0.1), 2px 3px 6px 1px rgba(0, 0, 0, 0.06);
+  -moz-box-shadow: 2px 3px 6px 1px rgba(0, 0, 0, 0.1), 2px 3px 6px 1px rgba(0, 0, 0, 0.06);
+  box-shadow: 2px 3px 6px 1px rgba(0, 0, 0, 0.1), 2px 3px 6px 1px rgba(0, 0, 0, 0.06);
 }

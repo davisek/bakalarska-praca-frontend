@@ -4,75 +4,40 @@ import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, CategoryScale, L
 import { Line } from 'vue-chartjs';
 import CrosshairPlugin from "chartjs-plugin-crosshair"
 import axiosInstance from "@/plugins/axios";
-import {formatDateTime} from "@/utils/dateUtil.ts";
+import {formatDateTime} from "@/utils/dateUtil";
+import { Sensor, SensorReading, SensorStatistics, ChartOptions, ChartContext } from '@/types';
 
 ChartJS.register(CrosshairPlugin, Title, Tooltip, Legend, LineElement, PointElement, LinearScale, CategoryScale);
 
 const props = defineProps({
   sensor: {
-    type: Object as () => {
-      sensor_name: string;
-      type: string;
-      display_name: string;
-      icon_path?: string;
-    },
+    type: Object as () => Sensor,
     required: true,
   },
+  fromDate: {
+    type: String,
+    default: ''
+  },
+  toDate: {
+    type: String,
+    default: ''
+  }
 });
 
-const statistics = reactive({
-  avg: null as number | null,
-  min: null as number | null,
-  max: null as number | null,
+const statistics = reactive<SensorStatistics>({
+  avg: null,
+  min: null,
+  max: null,
 });
 
-const timeRanges = [
-  { label: "24h", value: 1 },
-  { label: "48h", value: 2 },
-  { label: "1T", value: 7 },
-  { label: "2T", value: 14 },
-  { label: "1M", value: 30 },
-  { label: "3M", value: 90 },
-  { label: "6M", value: 180 },
-  { label: "1Y", value: 365 },
-  { label: "MAX", value: "max" },
-];
-
-const fromDate = ref('');
-const toDate = ref('');
-const selectedRange = ref(null);
 const symbol = ref('');
-
-const isMenuOpen = ref(false);
-
 const percentageDifference = ref<number | null>(null);
 const valueDifference = ref<number | null>(null);
 
 const chartLabels = ref<string[]>([]);
 const chartData = ref<number[]>([]);
-const chartOptions = ref({});
+const chartOptions = ref<ChartOptions>({});
 const errorMessage = ref<string | null>(null);
-
-const timeStartSetup = () => {
-  const now = new Date();
-  toDate.value = now.toISOString();
-  fromDate.value = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
-  selectedRange.value = 1
-}
-
-const setTimeRange = (days) => {
-  selectedRange.value = days;
-  if (days === "max") {
-    fromDate.value = "";
-    toDate.value = new Date().toISOString();
-  } else {
-    const now = new Date();
-    const newFromDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
-
-    fromDate.value = newFromDate.toISOString();
-    toDate.value = now.toISOString();
-  }
-};
 
 const calculatePercentageDifference = (data: number[]) => {
   if (data.length >= 2) {
@@ -91,23 +56,22 @@ const calculatePercentageDifference = (data: number[]) => {
   }
 };
 
-
 const loadChartData = async () => {
   try {
-    const params = {};
+    const params: { [key: string]: any } = {};
 
-    if (fromDate.value) {
-      params.from = fromDate.value;
+    if (props.fromDate) {
+      params.from = props.fromDate;
     }
 
-    if (toDate.value) {
-      params.to = toDate.value;
+    if (props.toDate) {
+      params.to = props.toDate;
     }
 
-    const response = await axiosInstance.get('/sensor-readings/collection/' + props.sensor.type, { params });
+    const response = await axiosInstance.get<SensorReading[]>('/sensor-readings/collection/' + props.sensor.type, { params });
     if (response.length !== 0) {
-      chartLabels.value = response.map((item: any) => formatDateTime(item.recorded_at));
-      chartData.value = response.map((item: any) =>
+      chartLabels.value = response.map((item: SensorReading) => formatDateTime(item.recorded_at));
+      chartData.value = response.map((item: SensorReading) =>
           item.value !== null ? parseFloat(item.value.toFixed(2)) : null
       );
       symbol.value = response[0]?.symbol || '';
@@ -141,7 +105,7 @@ const loadChartData = async () => {
           tooltip: {
             enabled: true,
             callbacks: {
-              label: function (context: any) {
+              label: function (context: ChartContext) {
                 const value = context.raw || '';
                 return `${value} ${symbol.value}`;
               }
@@ -198,83 +162,21 @@ const loadChartData = async () => {
 };
 
 onMounted(async () => {
-  timeStartSetup();
   await loadChartData();
 });
 
-watch([fromDate, toDate], () => {
-    loadChartData();
+watch([() => props.fromDate, () => props.toDate], () => {
+  loadChartData();
 });
+
 watch(() => props.sensor.type, () => {
-  timeStartSetup();
   loadChartData();
 });
 </script>
 
 <template>
   <div>
-    <h3 class="text-xl font-bold mb-4 text-center">Sensor Graph</h3>
-
-    <!-- Hamburger menu -->
-    <div class="lg:hidden flex justify-between items-center mb-4">
-      <h2 class="text-lg font-semibold">Filters</h2>
-      <button
-          @click="isMenuOpen = !isMenuOpen"
-          :class="[
-              'p-2 rounded-md bg-purple-500 hover:bg-purple-600 shadow-box',
-              isMenuOpen ? 'bg-purple-600' : ''
-          ]"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
-        </svg>
-      </button>
-    </div>
-    <div
-        :class="[
-        'justify-center lg:gap-4 text-center px-4 mb-4',
-        'lg:block',
-        isMenuOpen ? 'block' : 'hidden'
-      ]"
-    >
-      <div class="mb-4 lg:gap-4 gap-1 grid lg:grid-cols-9 md:grid-cols-3 grid-cols-2">
-        <button
-            v-for="(range, index) in timeRanges"
-            :key="index"
-            @click="setTimeRange(range.value)"
-            :class="[
-              'p-2 bg-blend-darken rounded-lg shadow-box hover:bg-purple-600 transition font-semibold lg:text-sm',
-              selectedRange === range.value ? 'bg-purple-500' : 'bg-blend-darken'
-            ]"
-        >
-          {{ range.label }}
-        </button>
-      </div>
-      <div class="lg:flex gap-4 justify-center font-semibold">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:mb-0 mb-4 gap-2 lg:flex-none">
-          <label class="font-medium" for="from">From:</label>
-          <input
-              type="date"
-              id="from"
-              v-model="fromDate"
-              class="border p-2 rounded-lg shadow-box focus:ring focus:ring-purple-400 focus:outline-none bg-gray-800"
-          />
-        </div>
-
-        <div class="flex flex-col lg:flex-row lg:items-center gap-2">
-          <label class="font-medium" for="to">To:</label>
-          <input
-              type="date"
-              id="to"
-              v-model="toDate"
-              class="border p-2 rounded-lg shadow-box focus:ring focus:ring-purple-400 focus:outline-none bg-gray-800"
-          />
-        </div>
-      </div>
-    </div>
-
-
-    <div v-if="errorMessage" class="text-red-500 text-center">
+    <div v-if="errorMessage" class="text-red-500 text-center py-4">
       {{ errorMessage }}
     </div>
 
@@ -314,7 +216,6 @@ watch(() => props.sensor.type, () => {
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-green-600">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4.499 8.248h15m-15 7.501h15" />
         </svg>
-
       </div>
       <div class="ml-4">
         <h5 class="text-gray-500 text-sm font-medium">Avg Value</h5>

@@ -5,6 +5,7 @@ import Group from "@/views/app@group/group.vue";
 import axiosInstance from "@/plugins/axios";
 import Statistics from "@/views/app@statistics/statistics.vue";
 import Groups from "@/views/app@group/groups.vue";
+import { SensorGroup, Sensor as SensorType } from '@/types';
 import {alpha} from "@vuelidate/validators";
 
 const routes: Array<RouteRecordRaw> = [
@@ -48,9 +49,9 @@ const router = createRouter({
 const loadPathsForSensorRoutes = async () => {
     try {
         const prefixes = ["dashboard", "groups", "statistics"];
-        const response = await axiosInstance.get('/sensor-groups');
+        const response = await axiosInstance.get<SensorGroup[]>('/sensor-groups');
 
-        response.forEach(group => {
+        response.forEach((group: SensorGroup) => {
             prefixes.forEach(prefix => {
                 router.addRoute({
                     path: `/${prefix}/${group.group_value}`,
@@ -62,7 +63,7 @@ const loadPathsForSensorRoutes = async () => {
                     }),
                 });
 
-                group.sensors.forEach(sensor => {
+                group.sensors.forEach((sensor: SensorType) => {
                     router.addRoute({
                         path: `/${prefix}/${group.group_value}/${sensor.type}`,
                         name: `${sensor.display_name}${prefix.charAt(0).toUpperCase() + prefix.slice(1)}`,

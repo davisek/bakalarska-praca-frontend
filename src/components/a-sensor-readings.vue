@@ -3,25 +3,21 @@ import {onMounted, onUnmounted, reactive, watch} from 'vue';
 import axiosInstance from '@/plugins/axios';
 import mqttClient from '@/plugins/mqtt';
 import {formatDateTime} from "@/utils/dateUtil.ts";
+import {Sensor, CurrentSensorData, MqttSensorPayload} from '@/types';
 
 const props = defineProps({
   sensor: {
-    type: Object as () => {
-      sensor_name: string;
-      type: string;
-      display_name: string;
-      icon_path?: string;
-    },
+    type: Object as () => Sensor,
     required: true,
   },
 });
 
-const sensorData = reactive({
-  value: null as number | null,
-  symbol: '' as string,
-  recordedAt: '' as string,
 
-  error: '' as string | null,
+const sensorData = reactive<CurrentSensorData>({
+  value: null,
+  symbol: '',
+  recordedAt: '',
+  error: null,
 });
 
 
@@ -40,12 +36,11 @@ const fetchSensorData = async () => {
 };
 
 const handleMQTTMessage = (topic: string, message: Buffer) => {
-  const payload = JSON.parse(message.toString());
+  const payload = JSON.parse(message.toString()) as MqttSensorPayload;
   if (topic === `${props.sensor.type}-data`) {
     sensorData.value = payload.value;
     sensorData.recordedAt = payload.created_at;
   }
-
 };
 
 const subscribeToMQTTTopics = () => {
@@ -102,8 +97,6 @@ onUnmounted(() => {
     </div>
   </div>
 </template>
-
-
 
 <style scoped>
 
