@@ -36,7 +36,7 @@ const route = useRoute();
             v-for="sensor in group.sensors"
             :key="sensor.type"
             :to="`${route.path}/${group.group_value}/${sensor.type}`"
-            class="p-4 rounded-lg shadow-box transition-transform duration-300 hover:scale-105 block"
+            class="p-4 rounded-lg shadow-box transition-transform duration-300 hover:scale-105 block bg-gray-800/75"
         >
           <ASensorReadings :sensor="sensor"/>
         </router-link>

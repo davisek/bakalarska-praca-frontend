@@ -7,6 +7,8 @@ import Statistics from "@/views/app@statistics/statistics.vue";
 import Groups from "@/views/app@group/groups.vue";
 import { SensorGroup, Sensor as SensorType } from '@/types';
 import {alpha} from "@vuelidate/validators";
+import Login from "@/views/app@login/login.vue";
+import Register from "@/views/app@register/register.vue";
 
 const routes: Array<RouteRecordRaw> = [
     {
@@ -36,6 +38,19 @@ const routes: Array<RouteRecordRaw> = [
     },
 
     {
+        path: '/login',
+        name: 'Login',
+        component: Login,
+        meta: { requiresAuth: false, hideForAuth: true }
+    },
+    {
+        path: '/register',
+        name: 'Register',
+        component: Register,
+        meta: { requiresAuth: false, hideForAuth: true }
+    },
+
+    {
         path: '/:patMatch(.*)*',
         redirect: '/'
     }
@@ -45,6 +60,18 @@ const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes
 })
+
+router.beforeEach((to, from, next) => {
+    const isAuthenticated = !!localStorage.getItem('auth_token');
+
+    if (to.meta.requiresAuth && !isAuthenticated) {
+        next({ name: 'Login' });
+    } else if (to.meta.hideForAuth && isAuthenticated) {
+        next({ name: 'Dashboard' });
+    } else {
+        next();
+    }
+});
 
 const loadPathsForSensorRoutes = async () => {
     try {

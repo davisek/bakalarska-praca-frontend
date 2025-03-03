@@ -1,4 +1,5 @@
 import {Component, Ref} from "vue";
+import {NotificationType} from "../utils/notificationUtil.ts";
 
 // Base sensor interface
 export interface Sensor {
@@ -70,12 +71,6 @@ export interface PaginatedResponse<T> {
     last_page: number;
     total: number;
     per_page: number;
-}
-
-export interface SectionConfig {
-    label: string;
-    component: Component;
-    visible: Ref<boolean>;
 }
 
 // Chart configuration

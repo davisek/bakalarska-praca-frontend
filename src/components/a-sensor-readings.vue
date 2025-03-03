@@ -78,16 +78,10 @@ onUnmounted(() => {
     <div v-else>
       <div class="lg:flex flex-none justify-center lg:ml-2 ml-0">
         <div class="w-full lg:w-5/6">
-          <h3 class="text-xl font-bold mb-2">{{ props.sensor.display_name }} Data</h3>
-          <p>{{ props.sensor.display_name }}: {{ sensorData.value }} {{ sensorData.symbol }}</p>
-          <p>
-            Recorded at:
-            <span v-if="sensorData.recordedAt">
-            {{ formatDateTime(sensorData.recordedAt) }}
-          </span>
-            <span v-else>
-            No data available
-          </span>
+          <h3 class="text-md font-bold mb-2 text-gray-500">{{ props.sensor.display_name }} Data</h3>
+          <p class="text-md">{{ props.sensor.display_name }}: <span class="font-bold">{{ sensorData.value }} {{ sensorData.symbol }}</span></p>
+          <p class="text-md"><span>Recorded at:</span> <span class="font-bold" v-if="sensorData.recordedAt">{{ formatDateTime(sensorData.recordedAt) }}</span>
+            <span v-else>No data available</span>
           </p>
         </div>
         <div class="w-full lg:w-1/6 justify-center mt-2 mr-2">
