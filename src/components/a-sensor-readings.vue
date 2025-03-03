@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import {onMounted, onUnmounted, reactive, watch} from 'vue';
+import {onMounted, onUnmounted, reactive, ref, watch} from 'vue';
 import axiosInstance from '@/plugins/axios';
 import mqttClient from '@/plugins/mqtt';
 import {formatDateTime} from "@/utils/dateUtil.ts";
 import {Sensor, CurrentSensorData, MqttSensorPayload} from '@/types';
+import ALoadingScreen from "@/components/a-loading-screen.vue";
 
 const props = defineProps({
   sensor: {
@@ -12,7 +13,6 @@ const props = defineProps({
   },
 });
 
-
 const sensorData = reactive<CurrentSensorData>({
   value: null,
   symbol: '',
@@ -20,8 +20,10 @@ const sensorData = reactive<CurrentSensorData>({
   error: null,
 });
 
+const isLoading = ref(true);
 
 const fetchSensorData = async () => {
+  isLoading.value = true;
   try {
     const response = await axiosInstance.get('/sensor-readings/' + props.sensor.type);
     sensorData.value = response.value;
@@ -32,6 +34,8 @@ const fetchSensorData = async () => {
   } catch (err) {
     sensorData.error = `Failed to load ${props.sensor.type} data`;
     console.error(err);
+  } finally {
+    isLoading.value = false;
   }
 };
 
@@ -74,6 +78,8 @@ onUnmounted(() => {
 
 <template>
   <div>
+    <ALoadingScreen :is-loading="isLoading" />
+
     <div class="text-center p-3 text-red-500" v-if="sensorData.error">{{ sensorData.error }}</div>
     <div v-else>
       <div class="lg:flex flex-none justify-center lg:ml-2 ml-0">

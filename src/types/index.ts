@@ -1,6 +1,3 @@
-import {Component, Ref} from "vue";
-import {NotificationType} from "../utils/notificationUtil.ts";
-
 // Base sensor interface
 export interface Sensor {
     sensor_name: string;
@@ -8,6 +5,7 @@ export interface Sensor {
     display_name: string;
     icon_path?: string;
     image_path?: string;
+    color_class?: string;
 }
 
 // Sensor group interface
