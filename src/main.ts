@@ -10,7 +10,7 @@ import App from './App.vue'
 import router from './plugins/router';
 import { createPinia } from 'pinia';
 import {createI18n} from "vue-i18n";
-import axiosInstance from './plugins/axios';
+import axiosInstance, { setupAuthErrorHandling } from './plugins/axios';
 import mqttClient from './plugins/mqtt';
 
 const pinia = createPinia()
@@ -42,5 +42,7 @@ app.config.globalProperties.$axios = axiosInstance;
 app.config.globalProperties.$mqtt = mqttClient;
 
 router.isReady().then(() => {
+    setupAuthErrorHandling(router);
+
     app.mount('#app')
-})
+});
