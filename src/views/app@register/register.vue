@@ -104,11 +104,11 @@ const formRef = ref(null);
 </script>
 
 <template>
-  <div class="flex min-h-screen gradient-background">
-    <div class="w-full">
-      <ABreadcrumb />
+  <ABreadcrumb />
 
-      <div class="p-6 flex items-center justify-center">
+  <div class="flex h-auto p-6">
+    <div class="w-full">
+      <div class="flex items-center justify-center">
         <v-card class="bg-gray-800/90 rounded-lg shadow-box w-full max-w-2xl px-6 py-8">
           <div class="mb-6 text-center">
             <div class="rounded-full p-3 bg-gradient-to-tr from-purple-600 to-purple-300 shadow-glow w-16 h-16 mx-auto mb-4 flex items-center justify-center animate-pulse-glow">
