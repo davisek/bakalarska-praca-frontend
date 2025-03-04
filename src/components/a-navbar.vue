@@ -10,7 +10,6 @@ const route = useRoute();
 const groups = ref([]);
 const authStore = useAuthStore();
 
-// Active section highlighting
 const isActive = (path: string) => {
   return route.path.includes(path);
 };
@@ -33,7 +32,7 @@ onMounted(() => {
   <div class="navbar-container">
     <div class="navbar-header">
       <div class="logo-container">
-        <div class="logo-icon">
+        <div class="logo-icon shadow-glow animate-pulse-glow pulse-subtle">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10">
             <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 0 0 2.25-2.25V6.75a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 6.75v10.5a2.25 2.25 0 0 0 2.25 2.25Zm.75-12h9v9h-9v-9Z" />
           </svg>
@@ -64,7 +63,7 @@ onMounted(() => {
             </MenuItems>
           </transition>
         </Menu>
-        <router-link v-else to="/login" class="login-button">
+        <router-link v-else to="/login" class="login-button shadow-glow animate-pulse-glow pulse-subtle">
           Login
         </router-link>
       </div>
@@ -112,7 +111,7 @@ onMounted(() => {
 }
 
 .logo-icon {
-  @apply bg-gradient-to-br from-purple-600 to-indigo-600 p-3 rounded-lg mb-2 shadow-glow animate-pulse-glow;
+  @apply bg-gradient-to-br from-purple-600 to-indigo-600 p-3 rounded-lg mb-2 ;
 }
 
 .logo-text {
@@ -149,7 +148,7 @@ onMounted(() => {
 }
 
 .login-button {
-  @apply bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2 px-6 rounded-md shadow-glow hover:from-purple-700 hover:to-indigo-700 transition-all duration-300;
+  @apply bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2 px-6 rounded-md hover:from-purple-700 hover:to-indigo-700 transition-all duration-300;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
@@ -176,19 +175,5 @@ onMounted(() => {
 
 .nav-text {
   @apply text-xs font-medium;
-}
-
-.shadow-glow {
-  box-shadow: 0 0 20px rgba(124, 58, 237, 0.3);
-}
-
-@keyframes pulse-subtle {
-  0% { box-shadow: 0 0 10px rgba(124, 58, 237, 0.2); }
-  50% { box-shadow: 0 0 15px rgba(124, 58, 237, 0.4); }
-  100% { box-shadow: 0 0 10px rgba(124, 58, 237, 0.2); }
-}
-
-.animate-pulse-glow {
-  animation: pulse-subtle 3s infinite;
 }
 </style>

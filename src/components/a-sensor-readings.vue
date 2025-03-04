@@ -5,6 +5,7 @@ import mqttClient from '@/plugins/mqtt';
 import {formatDateTime} from "@/utils/dateUtil.ts";
 import {Sensor, CurrentSensorData, MqttSensorPayload} from '@/types';
 import ALoadingScreen from "@/components/a-loading-screen.vue";
+import AErrorMessage from "@/components/a-error-message.vue";
 
 const props = defineProps({
   sensor: {
@@ -21,6 +22,7 @@ const sensorData = reactive<CurrentSensorData>({
 });
 
 const isLoading = ref(true);
+const errorMessage = ref<string | null>(null);
 
 const fetchSensorData = async () => {
   isLoading.value = true;
@@ -30,9 +32,9 @@ const fetchSensorData = async () => {
     sensorData.symbol = response.symbol;
     sensorData.recordedAt = response.recorded_at;
     console.log(sensorData)
-    sensorData.error = null;
+    errorMessage.value = null;
   } catch (err) {
-    sensorData.error = `Failed to load ${props.sensor.type} data`;
+    errorMessage.value = `Failed to load ${props.sensor.type} data.`;
     console.error(err);
   } finally {
     isLoading.value = false;
@@ -50,7 +52,7 @@ const handleMQTTMessage = (topic: string, message: Buffer) => {
 const subscribeToMQTTTopics = () => {
   mqttClient.subscribe(`${props.sensor.type}-data`, (err) => {
     if (!err) console.log('Subscribed to sensor');
-    sensorData.error = null;
+    errorMessage.value = null;
   });
 
   mqttClient.on('message', handleMQTTMessage);
@@ -79,20 +81,18 @@ onUnmounted(() => {
 <template>
   <div>
     <ALoadingScreen :is-loading="isLoading" />
+    <AErrorMessage :errorMessage="errorMessage" />
 
-    <div class="text-center p-3 text-red-500" v-if="sensorData.error">{{ sensorData.error }}</div>
-    <div v-else>
-      <div class="lg:flex flex-none justify-center lg:ml-2 ml-0">
-        <div class="w-full lg:w-5/6">
-          <h3 class="text-md font-bold mb-2 text-gray-500">{{ props.sensor.display_name }} Data</h3>
-          <p class="text-md">{{ props.sensor.display_name }}: <span class="font-bold">{{ sensorData.value }} {{ sensorData.symbol }}</span></p>
-          <p class="text-md"><span>Recorded at:</span> <span class="font-bold" v-if="sensorData.recordedAt">{{ formatDateTime(sensorData.recordedAt) }}</span>
-            <span v-else>No data available</span>
-          </p>
-        </div>
-        <div class="w-full lg:w-1/6 justify-center mt-2 mr-2">
-          <img :src="sensor.icon_path" :alt="sensor.sensor_name" class="lg:w-10/12 w-6/12 m-auto" />
-        </div>
+    <div class="lg:flex flex-none justify-center lg:ml-2 ml-0">
+      <div class="w-full lg:w-5/6">
+        <h3 class="text-md font-bold mb-2 text-gray-500">{{ props.sensor.display_name }} Data</h3>
+        <p class="text-md">{{ props.sensor.display_name }}: <span class="font-bold">{{ sensorData.value }} {{ sensorData.symbol }}</span></p>
+        <p class="text-md"><span>Recorded at:</span> <span class="font-bold" v-if="sensorData.recordedAt">{{ formatDateTime(sensorData.recordedAt) }}</span>
+          <span v-else>No data available</span>
+        </p>
+      </div>
+      <div class="w-full lg:w-1/6 justify-center mt-2">
+        <img :src="sensor.icon_path" :alt="sensor.sensor_name" class="lg:w-10/12 w-4/12 m-auto" />
       </div>
     </div>
   </div>

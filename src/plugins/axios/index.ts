@@ -33,7 +33,7 @@ axiosInstance.interceptors.response.use(
 
 export const setupAuthErrorHandling = (router: any) => {
     axiosInstance.interceptors.response.use(
-        response => response, // This is a no-op for successful responses
+        response => response,
         (error: AxiosError) => {
             if (error.response) {
                 const status = error.response.status;

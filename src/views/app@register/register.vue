@@ -229,17 +229,5 @@ const formRef = ref(null);
 </template>
 
 <style scoped>
-.shadow-glow {
-  box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
-}
 
-@keyframes pulse-subtle {
-  0% { box-shadow: 0 0 5px rgba(139, 92, 246, 0.3); }
-  50% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.5); }
-  100% { box-shadow: 0 0 5px rgba(139, 92, 246, 0.3); }
-}
-
-.animate-pulse-glow {
-  animation: pulse-subtle 3s infinite;
-}
 </style>

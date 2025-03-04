@@ -49,7 +49,7 @@ updateTimeRange(1);
 <template>
   <ABreadcrumb/>
 
-  <div class="p-6">
+  <div class="lg:p-6 p-0">
     <div class="bg-gray-800/70 rounded-lg shadow-box p-4 mb-6 gradient-subtle">
       <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
         <div class="flex items-center gap-4">
@@ -73,9 +73,9 @@ updateTimeRange(1);
                   :key="range.label"
                   @click="updateTimeRange(range.value)"
                   :class="[
-                    'px-2 py-1.5 rounded-md text-sm transition-all duration-200 text-center',
+                    'px-2 py-1.5 rounded-md text-sm transition-all duration-200 text-center border',
                     selectedTimeRange === range.value
-                      ? 'bg-purple-600 text-white'
+                      ? 'bg-purple-600 text-white btn-border'
                       : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
                   ]"
               >
@@ -125,34 +125,54 @@ updateTimeRange(1);
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div class="bg-gray-800/75 rounded-lg shadow-box p-4">
-        <h2 class="text-xl font-bold mb-4 text-purple-300 pb-2 border-b border-gray-700">Current Reading</h2>
-        <div class="rounded-full shadow-box p-2 gradient-component">
-          <div class="bg-gray-900 rounded-full text-center shadow-box py-5">
-            <ASensorReadings :sensor="props.sensor" />
+      <div class="sensor-content">
+        <h2 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300 pb-2 sensor-content-border">Current Reading</h2>
+        <div class="h-100 flex items-center justify-center pb-5">
+          <div class="rounded-full shadow-box p-1 gradient-component">
+            <div class="bg-gray-900 rounded-full text-center shadow-box p-10">
+              <ASensorReadings :sensor="props.sensor" />
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="lg:col-span-2 bg-gray-800/75 rounded-lg shadow-box p-4">
-        <h2 class="text-xl font-bold mb-4 text-purple-300 pb-2 border-b border-gray-700">Historical Data</h2>
+      <div class="lg:col-span-2 sensor-content">
+        <h2 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300 pb-2 mb-4 sensor-content-border">Historical Data</h2>
         <ADataTable :sensor="props.sensor" :from-date="fromDate" :to-date="toDate" />
       </div>
     </div>
 
-    <div class="mt-6 bg-gray-800/75 rounded-lg shadow-box p-4">
-      <h2 class="text-xl font-bold mb-4 text-purple-300 pb-2 border-b border-gray-700">Data Visualization</h2>
+    <div class="mt-6 sensor-content">
+      <h2 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300 pb-2 mb-4 sensor-content-border">Data Visualization</h2>
       <ADataGraph :sensor="props.sensor" :from-date="fromDate" :to-date="toDate" />
     </div>
+
   </div>
 </template>
 <style scoped>
 .gradient-subtle {
+  @apply border border-purple-600/20;
   background-image: linear-gradient(120deg, rgba(107,70,193,0.15) 0%, rgba(75,192,192,0.15) 100%);
+}
+
+.btn-border {
+  border: 1px solid;
+  border-color: rgb(255, 255, 255, 0.2) !important;
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(0.8) brightness(0.8) sepia(0.2) hue-rotate(240deg);
   cursor: pointer;
+}
+
+.sensor-content {
+  @apply p-6 rounded-xl shadow-lg;
+  @apply bg-gradient-to-br from-gray-800/95 to-gray-900/95;
+  @apply border border-gray-700/50;
+  @apply hover:shadow-2xl hover:border-purple-500/30;
+}
+
+.sensor-content-border {
+  @apply border-b border-white/20
 }
 </style>

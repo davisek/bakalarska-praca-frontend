@@ -42,7 +42,7 @@ const closeMobileMenu = () => {
 
     <ANotification position="top-right" />
 
-    <div class="lg:w-5/6 w-full p-10 min-h-100 gradient-background text-gray-100 bg-cover">
+    <div class="lg:w-5/6 w-full lg:p-10 p-4 lg:pt-10 pt-24 min-h-100 gradient-background text-gray-100 bg-cover">
       <router-view />
     </div>
   </div>

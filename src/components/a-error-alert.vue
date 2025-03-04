@@ -1,4 +1,3 @@
-<!-- components/a-error-alert.vue -->
 <script setup lang="ts">
 defineProps({
   message: {
