@@ -43,19 +43,19 @@ export function clearNotifications(): void {
     notifications.value = [];
 }
 
-export function showSuccess(message: string, timeout = 5000): number {
+export function showSuccess(message: string, timeout = 3000): number {
     return addNotification('success', message, timeout);
 }
 
-export function showError(message: string, timeout = 8000): number {
+export function showError(message: string, timeout = 5000): number {
     return addNotification('error', message, timeout);
 }
 
-export function showInfo(message: string, timeout = 5000): number {
+export function showInfo(message: string, timeout = 3000): number {
     return addNotification('info', message, timeout);
 }
 
-export function showWarning(message: string, timeout = 5000): number {
+export function showWarning(message: string, timeout = 3000): number {
     return addNotification('warning', message, timeout);
 }
 

@@ -6,7 +6,7 @@ const props = defineProps({
   isOpen: Boolean
 });
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close', 'open-profile', 'open-settings']);
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
@@ -17,6 +17,16 @@ function closeMenu() {
 
 function navigate(path: string) {
   router.push(path);
+  closeMenu();
+}
+
+function openProfile() {
+  emit('open-profile');
+  closeMenu();
+}
+
+function openSettings() {
+  emit('open-settings');
   closeMenu();
 }
 
@@ -40,8 +50,8 @@ function isActive(path: string) {
                alt="User profile" />
         </div>
         <div class="flex flex-wrap justify-center gap-2 w-full">
-          <button @click="navigate('/profile')" class="profile-btn">Profile</button>
-          <button @click="navigate('/settings')" class="profile-btn">Settings</button>
+          <button @click="openProfile" class="profile-btn">Profile</button>
+          <button @click="openSettings" class="profile-btn">Settings</button>
           <button @click="authStore.logout" class="logout-btn">Sign out</button>
         </div>
       </div>

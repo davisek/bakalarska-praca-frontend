@@ -10,8 +10,18 @@ const route = useRoute();
 const groups = ref([]);
 const authStore = useAuthStore();
 
+const emit = defineEmits(['open-profile', 'open-settings']);
+
 const isActive = (path: string) => {
   return route.path.includes(path);
+};
+
+const openProfile = () => {
+  emit('open-profile');
+};
+
+const openSettings = () => {
+  emit('open-settings');
 };
 
 const fetchGroups = async () => {
@@ -52,13 +62,28 @@ onMounted(() => {
           <transition enter-active-class="transition ease-out duration-200" enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100" leave-active-class="transition ease-in duration-100" leave-from-class="transform opacity-100 scale-100" leave-to-class="transform opacity-0 scale-95">
             <MenuItems class="dropdown-menu">
               <MenuItem v-slot="{ active }">
-                <router-link to="/profile" :class="[active ? 'bg-gray-100' : '', 'dropdown-item']">Your Profile</router-link>
+                <button
+                    @click="openProfile"
+                    :class="[active ? 'bg-gray-100' : '', 'dropdown-item w-full']"
+                >
+                  Your Profile
+                </button>
               </MenuItem>
               <MenuItem v-slot="{ active }">
-                <router-link to="/settings" :class="[active ? 'bg-gray-100' : '', 'dropdown-item']">Settings</router-link>
+                <button
+                    @click="openSettings"
+                    :class="[active ? 'bg-gray-100' : '', 'dropdown-item w-full']"
+                >
+                  Settings
+                </button>
               </MenuItem>
               <MenuItem v-slot="{ active }">
-                <button @click="authStore.logout" :class="[active ? 'bg-gray-100' : '', 'dropdown-item logout']">Sign out</button>
+                <button
+                    @click="authStore.logout"
+                    :class="[active ? 'bg-gray-100' : '', 'dropdown-item logout text-center']"
+                >
+                  Sign out
+                </button>
               </MenuItem>
             </MenuItems>
           </transition>

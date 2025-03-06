@@ -30,20 +30,6 @@ onMounted(async () => {
 });
 
 const route = useRoute();
-
-// const getSensorColorClass = (sensorType: string) => {
-//   const type = sensorType.toLowerCase();
-//
-//   if (type.includes('temp')) return 'temperature-card';
-//   if (type.includes('humid')) return 'humidity-card';
-//   if (type.includes('press')) return 'pressure-card';
-//   if (type.includes('light')) return 'light-card';
-//   if (type.includes('motion')) return 'motion-card';
-//   if (type.includes('air') || type.includes('quality')) return 'air-card';
-//
-//   return 'default-card';
-// };
-
 </script>
 
 <template>

@@ -7,8 +7,7 @@ import { showSuccess, showError } from '@/utils/notificationUtil';
 
 const router = useRouter();
 const loading = ref(false);
-const showPassword = ref(false);
-const showConfirmPassword = ref(false);
+const formSubmitted = ref(false);
 
 const form = ref({
   name: '',
@@ -19,59 +18,97 @@ const form = ref({
   locale: 'en',
 });
 
-const nameRules = [
-  (v: string) => !!v || 'Name is required'
-];
+const nameError = ref('');
+const surnameError = ref('');
+const emailError = ref('');
+const passwordError = ref('');
+const passwordConfirmationError = ref('');
 
-const surnameRules = [
-  (v: string) => !!v || 'Surname is required'
-];
+const validateName = () => {
+  if (!form.value.name) {
+    nameError.value = 'Name is required';
+    return false;
+  }
+  nameError.value = '';
+  return true;
+};
 
-const emailRules = [
-  (v: string) => !!v || 'Email is required',
-  (v: string) => /.+@.+\..+/.test(v) || 'Email must be valid'
-];
+const validateSurname = () => {
+  if (!form.value.surname) {
+    surnameError.value = 'Surname is required';
+    return false;
+  }
+  surnameError.value = '';
+  return true;
+};
 
-const passwordRules = [
-  (v: string) => !!v || 'Password is required',
-  (v: string) => v.length >= 8 || 'Password must be at least 8 characters'
-];
+const validateEmail = () => {
+  if (!form.value.email) {
+    emailError.value = 'Email is required';
+    return false;
+  } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(form.value.email)) {
+    emailError.value = 'Email must be valid';
+    return false;
+  }
+  emailError.value = '';
+  return true;
+};
 
-const confirmPasswordRules = [
-  (v: string) => !!v || 'Password confirmation is required',
-  (v: string) => v === form.value.password || 'Passwords must match'
-];
+const validatePassword = () => {
+  if (!form.value.password) {
+    passwordError.value = 'Password is required';
+    return false;
+  } else if (form.value.password.length < 8) {
+    passwordError.value = 'Password must be at least 8 characters';
+    return false;
+  }
+  passwordError.value = '';
+  return true;
+};
+
+const validatePasswordConfirmation = () => {
+  if (!form.value.password_confirmation) {
+    passwordConfirmationError.value = 'Password confirmation is required';
+    return false;
+  } else if (form.value.password_confirmation !== form.value.password) {
+    passwordConfirmationError.value = 'Passwords must match';
+    return false;
+  }
+  passwordConfirmationError.value = '';
+  return true;
+};
 
 const locales = [
-  { title: 'English', value: 'en' },
-  { title: 'Slovak', value: 'sk' }
+  { name: 'English', code: 'en' },
+  { name: 'Slovak', code: 'sk' }
 ];
 
 const onSubmit = async () => {
-  const { valid } = await formRef.value.validate();
+  formSubmitted.value = true;
 
-  if (valid) {
+  const isNameValid = validateName();
+  const isSurnameValid = validateSurname();
+  const isEmailValid = validateEmail();
+  const isPasswordValid = validatePassword();
+  const isPasswordConfirmationValid = validatePasswordConfirmation();
+
+  if (isNameValid && isSurnameValid && isEmailValid && isPasswordValid && isPasswordConfirmationValid) {
     loading.value = true;
 
     try {
       const response = await axiosInstance.post('/auth/register', form.value);
+      showSuccess(response.message || 'Registration successful');
 
-      if (response.type === 'success') {
-        showSuccess(response.message || 'Registration successful');
+      if (response.access_token) {
+        localStorage.setItem('auth_token', response.access_token);
 
-        if (response.token) {
-          localStorage.setItem('auth_token', response.token);
-
-          if (response.user) {
-            localStorage.setItem('user', JSON.stringify(response.user));
-          }
-
-          router.push('/dashboard');
-        } else {
-          router.push('/login');
+        if (response.user) {
+          localStorage.setItem('user', JSON.stringify(response.user));
         }
+
+        router.push('/dashboard');
       } else {
-        showError('Unexpected response format from server');
+        router.push('/login');
       }
     } catch (err: any) {
       if (err.response && err.response.data) {
@@ -81,15 +118,22 @@ const onSubmit = async () => {
           showError(errorData.message);
         } else if (errorData.errors) {
           const errors = errorData.errors;
-          const firstError = Object.values(errors)[0];
+
+          const firstErrorField = Object.keys(errors)[0];
+          const firstError = errors[firstErrorField];
           showError(Array.isArray(firstError) ? firstError[0] : 'Validation error');
+
+          if (errors.name) nameError.value = errors.name[0];
+          if (errors.surname) surnameError.value = errors.surname[0];
+          if (errors.email) emailError.value = errors.email[0];
+          if (errors.password) passwordError.value = errors.password[0];
+          if (errors.password_confirmation) passwordConfirmationError.value = errors.password_confirmation[0];
         } else {
           showError('Registration failed. Please try again.');
         }
       } else {
         showError('Unable to connect to the server. Please try again later.');
       }
-      console.error('Registration error:', err);
     } finally {
       loading.value = false;
     }
@@ -99,8 +143,6 @@ const onSubmit = async () => {
 const goToLogin = () => {
   router.push('/login');
 };
-
-const formRef = ref(null);
 </script>
 
 <template>
@@ -109,7 +151,7 @@ const formRef = ref(null);
   <div class="flex h-auto p-6">
     <div class="w-full">
       <div class="flex items-center justify-center">
-        <v-card class="bg-gray-800/90 rounded-lg shadow-box w-full max-w-2xl px-6 py-8">
+        <div class="bg-gray-800/90 rounded-lg shadow-box w-full max-w-2xl px-6 py-8">
           <div class="mb-6 text-center">
             <div class="rounded-full p-3 bg-gradient-to-tr from-purple-600 to-purple-300 shadow-glow w-16 h-16 mx-auto mb-4 flex items-center justify-center animate-pulse-glow">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 text-white">
@@ -120,109 +162,107 @@ const formRef = ref(null);
             <p class="mt-2 text-gray-400">Sign up for a new account</p>
           </div>
 
-          <v-form ref="formRef" @submit.prevent="onSubmit">
-            <v-card-text>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <v-text-field
+          <Form @submit.prevent="onSubmit">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div class="flex flex-col gap-1">
+                <InputText
                     v-model="form.name"
-                    label="First Name"
-                    prepend-inner-icon="mdi-account"
+                    :invalid="!!nameError"
                     variant="outlined"
-                    :rules="nameRules"
-                    density="comfortable"
-                    bg-color="rgb(31, 41, 55)"
-                    color="purple-accent-4"
-                ></v-text-field>
+                    name="name"
+                    placeholder="First Name"
+                    @blur="validateName"
+                />
+                <Message v-if="nameError" severity="error" size="small" variant="simple">{{ nameError }}</Message>
+              </div>
 
-                <v-text-field
+              <div class="flex flex-col gap-1">
+                <InputText
                     v-model="form.surname"
-                    label="Last Name"
-                    prepend-inner-icon="mdi-account"
+                    :invalid="!!surnameError"
                     variant="outlined"
-                    :rules="surnameRules"
-                    density="comfortable"
-                    bg-color="rgb(31, 41, 55)"
-                    color="purple-accent-4"
-                ></v-text-field>
+                    name="surname"
+                    placeholder="Last Name"
+                    @blur="validateSurname"
+                />
+                <Message v-if="surnameError" severity="error" size="small" variant="simple">{{ surnameError }}</Message>
               </div>
+            </div>
 
-              <v-text-field
+            <div class="flex flex-col gap-1 mb-4">
+              <InputText
                   v-model="form.email"
-                  label="Email"
+                  :invalid="!!emailError"
+                  variant="outlined"
+                  name="email"
                   type="email"
-                  prepend-inner-icon="mdi-email"
-                  variant="outlined"
-                  :rules="emailRules"
-                  density="comfortable"
-                  bg-color="rgb(31, 41, 55)"
-                  color="purple-accent-4"
-                  class="mb-4"
-              ></v-text-field>
+                  placeholder="Email"
+                  @blur="validateEmail"
+              />
+              <Message v-if="emailError" severity="error" size="small" variant="simple">{{ emailError }}</Message>
+            </div>
 
-              <v-text-field
+            <div class="flex flex-col gap-1 mb-4">
+              <Password
                   v-model="form.password"
-                  label="Password"
-                  :type="showPassword ? 'text' : 'password'"
-                  prepend-inner-icon="mdi-lock"
+                  :invalid="!!passwordError"
                   variant="outlined"
-                  :rules="passwordRules"
-                  density="comfortable"
-                  bg-color="rgb(31, 41, 55)"
-                  color="purple-accent-4"
-                  class="mb-4"
-                  :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-                  @click:append-inner="showPassword = !showPassword"
-              ></v-text-field>
+                  inputClass="w-full"
+                  :toggleMask="true"
+                  placeholder="Password"
+                  @blur="validatePassword"
+              />
+              <Message v-if="passwordError" severity="error" size="small" variant="simple">{{ passwordError }}</Message>
+            </div>
 
-              <v-text-field
+            <div class="flex flex-col gap-1 mb-4">
+              <Password
                   v-model="form.password_confirmation"
-                  label="Confirm Password"
-                  :type="showConfirmPassword ? 'text' : 'password'"
-                  prepend-inner-icon="mdi-lock-check"
+                  :invalid="!!passwordConfirmationError"
                   variant="outlined"
-                  :rules="confirmPasswordRules"
-                  density="comfortable"
-                  bg-color="rgb(31, 41, 55)"
-                  color="purple-accent-4"
-                  class="mb-4"
-                  :append-inner-icon="showConfirmPassword ? 'mdi-eye-off' : 'mdi-eye'"
-                  @click:append-inner="showConfirmPassword = !showConfirmPassword"
-              ></v-text-field>
+                  inputClass="w-full"
+                  :feedback="false"
+                  :toggleMask="true"
+                  placeholder="Confirm Password"
+                  @blur="validatePasswordConfirmation"
+              />
+              <Message v-if="passwordConfirmationError" severity="error" size="small" variant="simple">{{ passwordConfirmationError }}</Message>
+            </div>
 
-              <div class="gap-4">
-                <v-select
-                    v-model="form.locale"
-                    label="Preferred Language"
-                    :items="locales"
-                    item-title="title"
-                    item-value="value"
-                    prepend-inner-icon="mdi-translate"
-                    variant="outlined"
-                    density="comfortable"
-                    bg-color="rgb(31, 41, 55)"
-                    color="purple-accent-4"
-                ></v-select>
-              </div>
-            </v-card-text>
+            <div class="flex flex-col gap-1 mb-6">
+              <Dropdown
+                  v-model="form.locale"
+                  :options="locales"
+                  optionLabel="name"
+                  optionValue="code"
+                  placeholder="Select Language"
+                  class="w-full"
+              />
+              <SelectButton
+                  v-model="form.locale"
+                  :options="locales"
+                  optionLabel="name"
+                  optionValue="code"
+              />
+            </div>
 
-            <v-card-actions class="justify-center px-4 pb-4">
-              <v-btn
+            <div class="mb-4">
+              <Button
                   type="submit"
-                  block
-                  color="purple-accent-2"
-                  size="large"
+                  label="Create Account"
+                  severity="help"
+                  icon="pi pi-user-plus"
                   :loading="loading"
-                  class="text-white mb-3"
-              >
-                Create Account
-              </v-btn>
-            </v-card-actions>
+                  class="w-full"
+              />
+            </div>
+
             <div class="text-center mt-2 text-sm text-gray-400">
               Already have an account?
               <a @click="goToLogin" class="ml-1 text-purple-300 hover:text-purple-200 cursor-pointer">Sign in</a>
             </div>
-          </v-form>
-        </v-card>
+          </Form>
+        </div>
       </div>
     </div>
   </div>
@@ -230,4 +270,21 @@ const formRef = ref(null);
 
 <style scoped>
 
+.p-inputtext:hover {
+  border-color: rgb(139, 92, 246) !important;;
+}
+
+.p-inputtext:focus {
+  box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.5) !important;;
+  border-color: rgb(139, 92, 246) !important;;
+}
+
+:deep(.p-password input:hover) {
+  border-color: rgb(139, 92, 246);
+}
+
+:deep(.p-password input:focus) {
+  box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.5);
+  border-color: rgb(139, 92, 246);
+}
 </style>

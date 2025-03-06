@@ -4,23 +4,47 @@ import {ref} from "vue";
 import ANotification from "@/components/a-notification.vue";
 import AHamburgerMenu from "@/components/a-hamburger-menu.vue";
 import {useAuthStore} from "@/utils/authStore.ts";
+import ASettingsModal from "@/views/app@settings/a-settings-modal.vue";
 
 const isMobileMenuOpen = ref(false);
+const isSettingsModalOpen = ref(false);
+const activeSettingsTab = ref('notifications');
 const authStore = useAuthStore();
 
 const toggleMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value;
 };
 
+const openSettingsModal = (tab = 'notifications') => {
+  activeSettingsTab.value = tab;
+  isSettingsModalOpen.value = true;
+};
+
+const closeSettingsModal = () => {
+  isSettingsModalOpen.value = false;
+};
+
 const closeMobileMenu = () => {
   isMobileMenuOpen.value = false;
 };
+
+if (typeof window !== 'undefined') {
+  window.openSettings = (tab = 'notifications') => {
+    openSettingsModal(tab);
+  };
+}
+
+const openProfileSettings = () => openSettingsModal('profile');
+const openNotificationSettings = () => openSettingsModal('notifications');
 </script>
 
 <template>
   <div class="flex min-h-screen">
     <div class="hidden lg:block sticky top-0 h-screen w-1/6 bg-gray-800 text-gray-300">
-      <ANavbar />
+      <ANavbar
+          @open-profile="openProfileSettings"
+          @open-settings="openNotificationSettings"
+      />
     </div>
 
     <div class="lg:hidden fixed z-50 bg-gray-800 text-gray-300 w-full p-4 flex justify-between items-center border-b-cyan-300 border-b">
@@ -38,7 +62,12 @@ const closeMobileMenu = () => {
       </button>
     </div>
 
-    <AHamburgerMenu :is-open="isMobileMenuOpen" @close="closeMobileMenu" />
+    <AHamburgerMenu
+        :is-open="isMobileMenuOpen"
+        @close="closeMobileMenu"
+        @open-profile="openProfileSettings"
+        @open-settings="openNotificationSettings"
+    />
 
     <ANotification position="top-right" />
 
@@ -46,6 +75,12 @@ const closeMobileMenu = () => {
       <router-view />
     </div>
   </div>
+
+  <ASettingsModal
+      :is-open="isSettingsModalOpen"
+      :initial-tab="activeSettingsTab"
+      @close="closeSettingsModal"
+  />
 </template>
 
 <style scoped>

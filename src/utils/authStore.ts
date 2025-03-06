@@ -66,17 +66,21 @@ export const useAuthStore = defineStore('auth', () => {
         } catch (err) {
             if (err.response && err.response.data) {
                 const errorData = err.response.data;
-                if (errorData.message) {
-                    showError(errorData.message);
-                } else if (errorData.error) {
-                    showError(errorData.error);
+
+                if (errorData.errors) {
+                    const firstError = Object.values(errorData.errors)[0];
+                    showError(Array.isArray(firstError) ? firstError[0] : 'Validation error');
+
+                    return {
+                        success: false,
+                        errors: errorData.errors
+                    };
                 } else {
                     showError('Login failed. Please check your credentials and try again.');
                 }
             } else {
                 showError('An unexpected error occurred. Please try again.');
             }
-            console.error('Login error:', err);
             return false;
         } finally {
             loading.value = false;
@@ -85,18 +89,18 @@ export const useAuthStore = defineStore('auth', () => {
 
     const logout = async () => {
         loading.value = true;
-
+        let response;
         try {
-            await axiosInstance.post('/auth/logout');
+            response = await axiosInstance.post('/auth/logout');
         } catch (err) {
-            console.error('Logout error:', err);
+            showError('Logout unsuccessful');
         } finally {
             localStorage.removeItem('auth_token');
             localStorage.removeItem('user');
             isAuthenticated.value = false;
             user.value = null;
             loading.value = false;
-            showSuccess('Logged out successfully');
+            showSuccess(response.message);
         }
     };
 

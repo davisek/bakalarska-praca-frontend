@@ -6,30 +6,58 @@ import { useAuthStore } from '@/utils/authStore';
 
 const router = useRouter();
 const authStore = useAuthStore();
-const showPassword = ref(false);
+const emailError = ref('');
+const passwordError = ref('');
+const formSubmitted = ref(false);
 
 const form = ref({
   email: '',
   password: ''
 });
 
-const emailRules = [
-  (v: string) => !!v || 'Email is required',
-  (v: string) => /.+@.+\..+/.test(v) || 'Email must be valid'
-];
+const validateEmail = () => {
+  if (!form.value.email) {
+    emailError.value = 'Email is required';
+    return false;
+  } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(form.value.email)) {
+    emailError.value = 'Email must be valid';
+    return false;
+  }
 
-const passwordRules = [
-  (v: string) => !!v || 'Password is required',
-  (v: string) => v.length >= 6 || 'Password must be at least 6 characters'
-];
+  emailError.value = '';
+  return true;
+};
+
+const validatePassword = () => {
+  if (!form.value.password) {
+    passwordError.value = 'Password is required';
+    return false;
+  } else if (form.value.password.length < 8) {
+    passwordError.value = 'Password must be at least 8 characters';
+    return false;
+  }
+
+  passwordError.value = '';
+  return true;
+};
 
 const onSubmit = async () => {
-  const { valid } = await formRef.value.validate();
+  formSubmitted.value = true;
 
-  if (valid) {
-    const success = await authStore.login(form.value);
-    if (success) {
+  const isEmailValid = validateEmail();
+  const isPasswordValid = validatePassword();
+
+  if (isEmailValid && isPasswordValid) {
+    const result = await authStore.login(form.value);
+    if (result === true) {
       router.push('/dashboard');
+    } else if (result && result.errors) {
+      if (result.errors.email) {
+        emailError.value = result.errors.email[0];
+      }
+      if (result.errors.password) {
+        passwordError.value = result.errors.password[0];
+      }
     }
   }
 };
@@ -37,17 +65,15 @@ const onSubmit = async () => {
 const goToRegister = () => {
   router.push('/register');
 };
-
-const formRef = ref(null);
 </script>
 
 <template>
   <ABreadcrumb />
 
-  <div class="flex h-auto p-6">
+  <div class="flex h-auto lg:p-6 p-0">
     <div class="w-full">
       <div class="flex items-center justify-center">
-        <v-card class="bg-gray-800/90 rounded-lg shadow-box w-full max-w-md px-6 py-8">
+        <div class="bg-gray-800/90 rounded-lg shadow-box w-full max-w-md px-6 py-8">
           <div class="mb-6 text-center">
             <div class="rounded-full p-3 bg-gradient-to-tr from-purple-600 to-purple-300 shadow-glow w-16 h-16 mx-auto mb-4 flex items-center justify-center animate-pulse-glow">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 text-white">
@@ -58,63 +84,76 @@ const formRef = ref(null);
             <p class="mt-2 text-gray-400">Sign in to access your account</p>
           </div>
 
-          <v-form ref="formRef" @submit.prevent="onSubmit">
-            <v-card-text>
-              <v-text-field
+          <Form @submit.prevent="onSubmit">
+            <div class="flex flex-col gap-1 mb-4">
+              <InputText
                   v-model="form.email"
-                  label="Email"
+                  :invalid="!!emailError"
+                  variant="outlined"
+                  name="email"
                   type="email"
-                  prepend-inner-icon="mdi-email"
-                  variant="outlined"
-                  :rules="emailRules"
-                  density="comfortable"
-                  bg-color="rgb(31, 41, 55)"
-                  color="purple-accent-4"
-                  class="mb-4"
-              ></v-text-field>
+                  placeholder="Email"
+                  @blur="validateEmail"
+              />
+              <Message v-if="emailError" severity="error" size="small" variant="simple">{{ emailError }}</Message>
+            </div>
 
-              <v-text-field
-                  v-model="form.password"
-                  label="Password"
-                  :type="showPassword ? 'text' : 'password'"
-                  prepend-inner-icon="mdi-lock"
-                  variant="outlined"
-                  :rules="passwordRules"
-                  density="comfortable"
-                  bg-color="rgb(31, 41, 55)"
-                  color="purple-accent-4"
-                  :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-                  @click:append-inner="showPassword = !showPassword"
-              ></v-text-field>
+            <div class="flex flex-col gap-1 mb-4">
+                <Password
+                    v-model="form.password"
+                    :invalid="!!passwordError"
+                    variant="outlined"
+                    :feedback="false"
+                    :toggleMask="true"
+                    inputClass="w-full"
+                    placeholder="Password"
+                    @blur="validatePassword"
+                />
+              <Message v-if="passwordError" severity="error" size="small" variant="simple">{{ passwordError }}</Message>
+            </div>
 
-              <div class="flex justify-end mb-4">
-                <a href="#" class="text-sm text-purple-300 hover:text-purple-200">Forgot password?</a>
-              </div>
-            </v-card-text>
+            <div class="flex justify-end mb-4">
+              <a href="#" class="text-sm text-purple-300 hover:text-purple-200">Forgot password?</a>
+            </div>
 
-            <v-card-actions class="justify-center px-4 pb-4">
-              <v-btn
+            <div class="mb-4">
+              <Button
                   type="submit"
-                  block
-                  color="purple-accent-2"
-                  size="large"
+                  label="Sign In"
+                  severity="help"
+                  icon="pi pi-sign-in"
                   :loading="authStore.loading"
-                  class="text-white mb-3"
-              >
-                Sign In
-              </v-btn>
-            </v-card-actions>
+                  class="w-full"
+              />
+            </div>
 
             <div class="text-center mt-2 text-sm text-gray-400">
               Don't have an account?
               <a @click="goToRegister" class="ml-1 text-purple-300 hover:text-purple-200 cursor-pointer">Sign up</a>
             </div>
-          </v-form>
-        </v-card>
+          </Form>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+.p-inputtext:hover {
+  border-color: rgb(139, 92, 246) !important;
+}
+
+.p-inputtext:focus {
+  box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.5) !important;
+  border-color: rgb(139, 92, 246) !important;
+}
+
+:deep(.p-password input:hover) {
+  border-color: rgb(139, 92, 246);
+}
+
+:deep(.p-password input:focus) {
+  box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.5);
+  border-color: rgb(139, 92, 246);
+}
 </style>

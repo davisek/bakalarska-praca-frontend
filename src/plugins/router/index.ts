@@ -6,7 +6,6 @@ import axiosInstance from "@/plugins/axios";
 import Statistics from "@/views/app@statistics/statistics.vue";
 import Groups from "@/views/app@group/groups.vue";
 import { SensorGroup, Sensor as SensorType } from '@/types';
-import {alpha} from "@vuelidate/validators";
 import Login from "@/views/app@login/login.vue";
 import Register from "@/views/app@register/register.vue";
 
