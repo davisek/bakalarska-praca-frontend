@@ -4,7 +4,7 @@ import axiosInstance from "@/plugins/axios";
 import {formatDateTime} from "@/utils/dateUtil";
 import {Sensor, SensorReading, PaginationMeta, PaginatedResponse} from '@/types';
 import AErrorMessage from "@/components/a-error-message.vue";
-import ALoadingScreen from "@/components/a-loading-screen.vue";
+import {showError, showSuccess} from "@/utils/notificationUtil.ts";
 
 const props = defineProps({
   sensor: {
@@ -89,6 +89,28 @@ const fetchRawData = async () => {
   }
 };
 
+const exportXLSX = async () => {
+  try {
+    isLoading.value = true;
+    const params: { [key: string]: any } = {};
+
+    if (props.fromDate) params.from = props.fromDate;
+    if (props.toDate) params.to = props.toDate;
+
+    const queryParams = new URLSearchParams(params).toString();
+    const downloadUrl = `${axiosInstance.defaults.baseURL}/sensor-readings/collection/${props.sensor.type}/download?${queryParams}`;
+
+    window.open(downloadUrl, '_blank');
+
+    showSuccess('File downloading..');
+    errorMessage.value = null;
+  } catch (error) {
+    showError('Failed to download file. Please try again.');
+  } finally {
+    isLoading.value = false;
+  }
+};
+
 const onPage = (event) => {
   paginationMeta.value.current_page = event.page + 1;
   paginationMeta.value.per_page = event.rows;
@@ -138,7 +160,7 @@ watch(() => props.sensor.type, () => {
             <Button @click="fetchRawData" type="button" icon="pi pi-refresh" text />
           </template>
           <template #paginatorend>
-            <Button @click="exportCSV" type="button" icon="pi pi-download" text />
+            <Button @click="exportXLSX" type="button" icon="pi pi-download" text />
           </template>
 
           <Column
