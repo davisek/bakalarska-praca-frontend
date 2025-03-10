@@ -24,8 +24,12 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
     (response: AxiosResponse) => {
-        if (response.data && 'data' in response.data && 'current_page' in response.data) {
-            return response.data as PaginatedResponse<any>;
+        if (response.data && 'data' in response.data && 'meta' in response.data) {
+            return {
+                data: response.data.data,
+                ...response.data.meta,
+                links: response.data.links
+            };
         }
         return response.data.data ?? response.data;
     }

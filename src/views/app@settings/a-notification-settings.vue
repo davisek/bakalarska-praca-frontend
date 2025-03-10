@@ -45,10 +45,19 @@ const saveNotificationSettings = async () => {
     }));
 
     const response = await axiosInstance.put('/settings', { settings: updates });
-    showSuccess(response.message);
+    if (response.type === 'success') {
+      showSuccess(response.message);
+    } else {
+      showError(response.message);
+    }
     savingNotifications.value = false;
   } catch (error) {
-    showError('Failed to update notification settings');
+    if (error.response && error.response.data) {
+      showError(error.response.data.message);
+    } else {
+      showError('Failed to update notification settings');
+    }
+  } finally {
     savingNotifications.value = false;
   }
 };

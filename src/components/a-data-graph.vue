@@ -73,7 +73,7 @@ const loadChartData = async () => {
 
     const response = await axiosInstance.get<SensorReading[]>('/sensor-readings/collection/' + props.sensor.type, { params });
     if (response.length !== 0) {
-      chartLabels.value = response.map((item: SensorReading) => formatDateTime(item.recorded_at));
+      chartLabels.value = response.map((item: SensorReading) => formatDateTime(item.created_at));
       chartData.value = response.map((item: SensorReading) =>
           item.value !== null ? parseFloat(item.value.toFixed(2)) : null
       );
@@ -180,7 +180,6 @@ const loadChartData = async () => {
     }
   } catch (error) {
     errorMessage.value = 'Failed to load data. Please try again.';
-    console.error(error);
   } finally {
     isLoading.value = false;
   }

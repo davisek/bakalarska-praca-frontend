@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import {onMounted, ref} from 'vue';
 import { useRouter } from 'vue-router';
 import axiosInstance from '@/plugins/axios';
 import ABreadcrumb from "@/components/a-breadcrumb.vue";
 import { showSuccess, showError } from '@/utils/notificationUtil';
+import {Locales} from "@/types";
 
 const router = useRouter();
-const loading = ref(false);
+const isLoading = ref(false);
 const formSubmitted = ref(false);
+const locales = ref<Locales>(null)
 
 const form = ref({
   name: '',
@@ -78,10 +80,17 @@ const validatePasswordConfirmation = () => {
   return true;
 };
 
-const locales = [
-  { name: 'English', code: 'en' },
-  { name: 'Slovak', code: 'sk' }
-];
+const getLocale = async () => {
+  isLoading.value = true;
+  try {
+    const response = await axiosInstance.get(`/auth/locale`);
+    locales.value = response.locales;
+  } catch (error) {
+    showError('Unknown error.');
+  } finally {
+    isLoading.value = false;
+  }
+}
 
 const onSubmit = async () => {
   formSubmitted.value = true;
@@ -93,11 +102,15 @@ const onSubmit = async () => {
   const isPasswordConfirmationValid = validatePasswordConfirmation();
 
   if (isNameValid && isSurnameValid && isEmailValid && isPasswordValid && isPasswordConfirmationValid) {
-    loading.value = true;
+    isLoading.value = true;
 
     try {
       const response = await axiosInstance.post('/auth/register', form.value);
-      showSuccess(response.message || 'Registration successful');
+      if (response.type === 'success') {
+        showSuccess(response.message);
+      } else {
+        showError(response.message);
+      }
 
       if (response.access_token) {
         localStorage.setItem('auth_token', response.access_token);
@@ -135,10 +148,14 @@ const onSubmit = async () => {
         showError('Unable to connect to the server. Please try again later.');
       }
     } finally {
-      loading.value = false;
+      isLoading.value = false;
     }
   }
 };
+
+onMounted(async () => {
+  await getLocale();
+});
 
 const goToLogin = () => {
   router.push('/login');
@@ -148,7 +165,7 @@ const goToLogin = () => {
 <template>
   <ABreadcrumb />
 
-  <div class="flex h-auto p-6">
+  <div class="flex h-auto lg:p-6 p-0">
     <div class="w-full">
       <div class="flex items-center justify-center">
         <div class="bg-gray-800/90 rounded-lg shadow-box w-full max-w-2xl px-6 py-8">
@@ -230,20 +247,25 @@ const goToLogin = () => {
             </div>
 
             <div class="flex flex-col gap-1 mb-6">
-              <Dropdown
-                  v-model="form.locale"
-                  :options="locales"
-                  optionLabel="name"
-                  optionValue="code"
-                  placeholder="Select Language"
-                  class="w-full"
-              />
               <SelectButton
                   v-model="form.locale"
                   :options="locales"
-                  optionLabel="name"
-                  optionValue="code"
-              />
+                  optionLabel="label"
+                  optionValue="value"
+                  :disabled="!locales"
+              >
+                <template #option="locale">
+                  <div class="flex items-center">
+                    <img
+                        v-if="locale.option.symbol"
+                        :src="locale.option.symbol"
+                        :alt="locale.option.label"
+                        class="w-5 h-5 mr-2"
+                    />
+                    <span>{{ locale.option.label }}</span>
+                  </div>
+                </template>
+              </SelectButton>
             </div>
 
             <div class="mb-4">
@@ -252,7 +274,7 @@ const goToLogin = () => {
                   label="Create Account"
                   severity="help"
                   icon="pi pi-user-plus"
-                  :loading="loading"
+                  :isLoading="isLoading"
                   class="w-full"
               />
             </div>
@@ -269,22 +291,4 @@ const goToLogin = () => {
 </template>
 
 <style scoped>
-
-.p-inputtext:hover {
-  border-color: rgb(139, 92, 246) !important;;
-}
-
-.p-inputtext:focus {
-  box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.5) !important;;
-  border-color: rgb(139, 92, 246) !important;;
-}
-
-:deep(.p-password input:hover) {
-  border-color: rgb(139, 92, 246);
-}
-
-:deep(.p-password input:focus) {
-  box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.5);
-  border-color: rgb(139, 92, 246);
-}
 </style>

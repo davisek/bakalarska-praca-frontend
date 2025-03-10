@@ -1,0 +1,71 @@
+:root {
+    --primary-color: rgb(139, 92, 246);
+    --primary-color-hover: rgb(124, 58, 237);
+
+    --surface-0: rgb(17, 24, 39);
+    --surface-50: rgb(21, 26, 47);
+    --surface-100: rgb(29, 30, 60);
+    --surface-200: rgb(38, 35, 76);
+    --surface-300: rgb(55, 65, 81);
+    --surface-400: rgb(75, 85, 99);
+    --surface-500: rgb(107, 114, 128);
+    --surface-600: rgb(156, 163, 175);
+    --surface-700: rgb(209, 213, 219);
+    --surface-800: rgb(229, 231, 235);
+    --surface-900: rgb(243, 244, 246);
+
+    --text-color: rgba(255, 255, 255, 0.87);
+    --text-color-secondary: rgba(255, 255, 255, 0.6);
+
+    --highlight-bg: rgba(139, 92, 246, 0.16);
+    --highlight-text-color: var(--primary-color);
+
+    .p-tabmenu .p-tabmenu-nav .p-tabmenuitem.p-highlight .p-menuitem-link {
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .p-button.p-button-primary {
+        background: linear-gradient(to right, rgb(126, 34, 206), var(--primary-color));
+        border: none;
+    }
+
+    .p-button.p-button-primary:hover {
+        background: linear-gradient(to right, rgb(126, 34, 206), var(--primary-color-hover));
+        box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
+    }
+
+    .p-inputtext:enabled:hover {
+        border-color: var(--primary-color);
+    }
+
+    .p-inputtext:enabled:focus {
+        outline: 0 none;
+        outline-offset: 0;
+        border-color: var(--primary-color);
+    }
+
+    .p-password input:enabled:hover {
+        border-color: var(--primary-color);
+    }
+
+    .p-password.p-focus input:enabled {
+        border-color: var(--primary-color);
+    }
+
+    .p-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-link:not(.p-disabled):focus {
+        box-shadow: none;
+    }
+
+    .p-tabmenu .p-tabmenu-nav .p-tabmenuitem:not(.p-highlight):not(.p-disabled):hover .p-menuitem-link {
+        color: var(--text-color);
+        border-color: transparent;
+    }
+
+    .p-datatable {
+        background-color: rgb(17 24 39 / 0.6);
+        border: 1px solid rgb(55 65 81 / 0.5);
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+}

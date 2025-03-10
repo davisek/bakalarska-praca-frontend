@@ -4,6 +4,7 @@ import axiosInstance from "@/plugins/axios";
 import {formatDateTime} from "@/utils/dateUtil";
 import {Sensor, SensorReading, PaginationMeta, PaginatedResponse} from '@/types';
 import AErrorMessage from "@/components/a-error-message.vue";
+import ALoadingScreen from "@/components/a-loading-screen.vue";
 
 const props = defineProps({
   sensor: {
@@ -24,24 +25,22 @@ const paginationMeta = ref<PaginationMeta>({
   current_page: 1,
   last_page: 1,
   total: 0,
+  per_page: 15
 });
 
-const currentPage = ref(1);
-const perPage = ref(15);
-const perPageOptions = [10, 15, 25, 50];
-const sortField = ref<string>('created_at');
-const sortDirection = ref<string>('desc');
+const sortField = ref('created_at');
+const sortOrder = ref(1);
 
 const tableData = ref<SensorReading[]>([]);
 const errorMessage = ref<string | null>(null);
 const isLoading = ref(false);
 
-const calculatePercentageChange = (data: SensorReading[], sortDirection: string) => {
+const calculatePercentageChange = (data: SensorReading[], sortOrder) => {
   return data.map((item, index) => {
     let currentValue = item.value;
     let previousValue;
 
-    if (sortDirection === 'desc') {
+    if (sortOrder === -1) {
       previousValue = data[index + 1]?.value;
     } else {
       previousValue = data[index - 1]?.value;
@@ -56,23 +55,14 @@ const calculatePercentageChange = (data: SensorReading[], sortDirection: string)
   });
 };
 
-const setSorting = (field: string) => {
-  if (sortField.value === field) {
-    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
-  } else {
-    sortField.value = field;
-    sortDirection.value = 'asc';
-  }
-  fetchRawData();
-};
-
 const fetchRawData = async () => {
   isLoading.value = true;
   try {
     const params: { [key: string]: any } = {
-      page: currentPage.value,
-      per_page: perPage.value,
-      sort: [{ field: sortField.value, direction: sortDirection.value }],
+      page: paginationMeta.value.current_page,
+      per_page: paginationMeta.value.per_page,
+      sort_by: sortField.value,
+      sort_dir: sortOrder.value === 1 ? 'asc' : 'desc',
     };
 
     if (props.fromDate) params.from = props.fromDate;
@@ -80,11 +70,12 @@ const fetchRawData = async () => {
 
     const response = await axiosInstance.get<PaginatedResponse<SensorReading>>(`/sensor-readings/collection/${props.sensor.type}/raw`, { params });
     if (response.data.length !== 0) {
-      tableData.value = calculatePercentageChange(response.data, sortDirection.value);
+      tableData.value = calculatePercentageChange(response.data, sortOrder);
       paginationMeta.value = {
         current_page: response.current_page,
         last_page: response.last_page,
         total: response.total,
+        per_page: response.per_page,
       };
       errorMessage.value = null;
     } else {
@@ -93,16 +84,20 @@ const fetchRawData = async () => {
     }
   } catch (error) {
     errorMessage.value = 'Failed to load data. Please try again.';
-    console.error(error);
   } finally {
     isLoading.value = false;
   }
 };
 
-const handlePerPageChange = (event: Event) => {
-  const target = event.target as HTMLSelectElement;
-  perPage.value = parseInt(target.value);
-  currentPage.value = 1;
+const onPage = (event) => {
+  paginationMeta.value.current_page = event.page + 1;
+  paginationMeta.value.per_page = event.rows;
+  fetchRawData();
+};
+
+const onSort = (event) => {
+  sortField.value = event.sortField;
+  sortOrder.value = event.sortOrder;
   fetchRawData();
 };
 
@@ -117,127 +112,81 @@ watch([() => props.fromDate, () => props.toDate], () => {
 watch(() => props.sensor.type, () => {
   fetchRawData();
 });
-
-watch(currentPage, () => fetchRawData());
 </script>
 
 <template>
-  <div>
-    <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
-      <div class="flex gap-2">
-        <button
-            @click="setSorting('value')"
-            class="px-3 py-1.5 rounded bg-gray-700 text-gray-300 flex items-center gap-1"
-            :class="sortField === 'value' ? 'bg-purple-700/40 text-purple-200 btn-sort' : 'btn-border'"
+      <div class="overflow-x-auto">
+        <DataTable
+            v-if="!errorMessage"
+            :value="tableData"
+            :paginator="true"
+            :rows="paginationMeta.per_page"
+            :totalRecords="paginationMeta.total"
+            :rowsPerPageOptions="[10, 15, 25, 50]"
+            :lazy="true"
+            :sortField="sortField"
+            :sortOrder="sortOrder"
+            @page="onPage"
+            @sort="onSort"
+            paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+            currentPageReportTemplate="{first} to {last} of {totalRecords}"
+            stripedRows
+            :loading="isLoading"
+            responsiveLayout="scroll"
         >
-          Value
-          <span v-if="sortField === 'value'" class="ml-1">
-            {{ sortDirection === 'asc' ? '↑' : '↓' }}
-          </span>
-        </button>
+          <template #paginatorstart>
+            <Button @click="fetchRawData" type="button" icon="pi pi-refresh" text />
+          </template>
+          <template #paginatorend>
+            <Button @click="exportCSV" type="button" icon="pi pi-download" text />
+          </template>
 
-        <button
-            @click="setSorting('created_at')"
-            class="px-3 py-1.5 rounded bg-gray-700 text-gray-300 flex items-center gap-1"
-            :class="sortField === 'created_at' ? 'bg-purple-700/40 text-purple-200 btn-sort' : 'btn-border'"
-        >
-          Recorded at
-          <span v-if="sortField === 'created_at'" class="ml-1">
-            {{ sortDirection === 'asc' ? '↑' : '↓' }}
-          </span>
-        </button>
+          <Column
+              field="value"
+              header="Value"
+              :style="{ width: '33%' }"
+              sortable
+          >
+            <template #body="{ data }">
+              <span class="font-bold">{{ data.value }}</span>
+              <span class="text-gray-400 text-sm ml-1">{{ data.symbol }}</span>
+            </template>
+          </Column>
+
+          <Column
+              field="created_at"
+              header="Recorded at"
+              :style="{ width: '33%' }"
+              sortable
+          >
+            <template #body="{ data }">
+              {{ formatDateTime(data.created_at) }}
+            </template>
+          </Column>
+
+          <Column
+              field="percentageChange"
+              header="Percentage change"
+              :style="{ width: '33%' }"
+          >
+            <template #body="{ data }">
+              <span v-if="data.percentageChange !== null"
+                    :class="data.percentageChange > 0 ? 'text-green-400' :
+                         data.percentageChange != 0 ? 'text-red-400' : 'text-gray-500'"
+              >
+                {{ data.percentageChange > 0 ? '+' : '' }}{{ data.percentageChange }}%
+              </span>
+              <span v-else class="text-gray-500">–</span>
+            </template>
+          </Column>
+        </DataTable>
+
+        <AErrorMessage
+            v-else
+            :errorMessage="errorMessage"
+        />
       </div>
-
-      <div class="flex items-center gap-2">
-        <label for="perPage" class="text-gray-400 text-sm">Items per page:</label>
-        <select
-            id="perPage"
-            v-model="perPage"
-            @change="handlePerPageChange"
-            class="bg-gray-700 rounded px-2 py-1 text-white btn-border"
-        >
-          <option v-for="option in perPageOptions" :key="option" :value="option">
-            {{ option }}
-          </option>
-        </select>
-      </div>
-    </div>
-
-    <div class="bg-gray-900 rounded-lg overflow-hidden btn-border">
-      <div class="grid grid-cols-3 p-3 bg-gray-800 font-semibold top-0">
-        <div class="text-left">Value</div>
-        <div class="text-center">Recorded at</div>
-        <div class="text-right">Percentage change</div>
-      </div>
-
-      <div class="max-h-96 overflow-y-auto scrollbar">
-        <div
-            v-for="(item, index) in tableData"
-            :key="index"
-            class="grid grid-cols-3 p-3 border-b border-gray-700"
-            :class="{ 'bg-gray-800/30': index % 2 !== 0 }"
-        >
-          <div class="text-left">
-            <span class="font-bold">{{ item.value }}</span>
-            <span class="text-gray-400 text-sm ml-1">{{ item.symbol }}</span>
-          </div>
-
-          <div class="text-center">
-            {{ formatDateTime(item.recorded_at) }}
-          </div>
-
-          <div class="text-right">
-            <span v-if="item.percentageChange !== null"
-                  :class="item.percentageChange > 0 ? 'text-green-400' : item.percentageChange != 0 ? 'text-red-400' : 'text-gray-500'">
-              {{ item.percentageChange > 0 ? '+' : '' }}{{ item.percentageChange }}%
-            </span>
-            <span v-else class="text-gray-500">–</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <AErrorMessage :errorMessage="errorMessage" />
-
-    <div v-if="errorMessage === null" class="flex justify-center items-center gap-4 mt-4">
-      <button
-          @click="currentPage > 1 && (currentPage -= 1)"
-          :disabled="currentPage === 1"
-          class="p-2 rounded-full bg-gray-700 flex items-center justify-center"
-          :class="{'opacity-50 cursor-not-allowed': currentPage === 1}"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5" />
-        </svg>
-      </button>
-
-      <div class="text-center">
-        <span>Page {{ paginationMeta.current_page }} of {{ paginationMeta.last_page }}</span>
-        <span class="text-sm text-gray-500 ml-1">({{ paginationMeta.total }} items)</span>
-      </div>
-
-      <button
-          @click="currentPage < paginationMeta.last_page && (currentPage += 1)"
-          :disabled="currentPage === paginationMeta.last_page"
-          class="p-2 rounded-full bg-gray-700 flex items-center justify-center"
-          :class="{'opacity-50 cursor-not-allowed': currentPage === paginationMeta.last_page}"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
-        </svg>
-      </button>
-    </div>
-  </div>
 </template>
 
 <style scoped>
-.btn-sort {
-  border: 1px solid;
-  border-color: rgb(147, 51, 234) !important;
-}
-
-.btn-border {
-  border: 1px solid;
-  border-color: rgb(255, 255, 255, 0.2) !important;
-}
 </style>

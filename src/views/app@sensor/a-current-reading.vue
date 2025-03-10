@@ -30,7 +30,6 @@ const fetchSensorData = async () => {
     sensorData.value = response.value;
     sensorData.symbol = response.symbol;
     sensorData.created_at = response.created_at;
-    console.log(sensorData)
     errorMessage.value = null;
   } catch (err) {
     errorMessage.value = `Failed to load ${props.sensor.type} data.`;
@@ -78,26 +77,39 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div>
+  <div class="rounded-lg relative flex flex-col justify-center items-center h-full pb-8">
     <ALoadingScreen :is-loading="isLoading" />
     <AErrorMessage :errorMessage="errorMessage" />
 
-    <div class="lg:flex flex-none justify-center lg:ml-2 ml-0">
-      <div class="w-full lg:w-5/6">
-        <h3 class=" text-md font-bold mb-2 text-gray-500">{{ props.sensor.display_name }} Data</h3>
-        <p class="value-number text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300 shadow-sm"><span class="font-bold">{{ sensorData.value }} {{ sensorData.symbol }}</span></p>
-        <p class="text-md"><span>Recorded at:</span> <span class="font-bold" v-if="sensorData.created_at">{{ formatDateTime(sensorData.created_at) }}</span>
-          <span v-else>No data available</span>
-        </p>
+    <div v-if="!isLoading && !errorMessage" class="flex flex-col justify-center items-center h-full w-full">
+      <div class="mb-4">
+        <h3 class="text-lg font-bold text-gray-500">{{ props.sensor.display_name }}</h3>
       </div>
-      <div class="w-full lg:w-1/6 justify-center mt-2">
-        <img :src="sensor.icon_path" :alt="sensor.sensor_name" class="lg:w-10/12 w-4/12 m-auto" />
+
+      <div class="flex flex-col justify-center items-center">
+        <div class="flex items-baseline justify-center">
+          <span class="value-number">{{ sensorData.value }}</span>
+          <span class="value-unit">{{ sensorData.symbol }}</span>
+        </div>
+        <div class="flex items-center text-lg text-gray-400 mt-6 justify-center">
+          <i class="pi pi-clock mr-2 text-gray-400"></i>
+          <span v-if="sensorData.created_at">{{ formatDateTime(sensorData.created_at) }}</span>
+          <span v-else class="text-gray-500">No data available</span>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+.value-number {
+  @apply xl:text-8xl text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300 shadow-sm;
+}
+
+.value-unit {
+  @apply xl:text-4xl text-lg ml-2 text-gray-400 font-medium;
+}
+
 @keyframes pulse {
   0% { opacity: 0.8; }
   50% { opacity: 1; }

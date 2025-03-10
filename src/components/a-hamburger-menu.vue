@@ -39,50 +39,91 @@ function isActive(path: string) {
   <div v-if="isOpen" class="mobile-menu">
     <div class="flex justify-between items-center mb-8 pb-4 border-b border-white/10">
       <h1 class="text-2xl font-bold text-white">SensorDataApp</h1>
-      <button @click="closeMenu" class="close-button">✕</button>
+      <Button
+          icon="pi pi-times"
+          @click="closeMenu"
+          text
+          rounded
+          aria-label="Close"
+          class="p-2"
+      />
     </div>
 
     <div class="mb-8">
       <div v-if="authStore.isAuthenticated" class="flex flex-col items-center gap-4">
-        <div class="avatar">
-          <img class="w-full h-full object-cover"
-               src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&w=256&h=256&q=80"
-               alt="User profile" />
-        </div>
         <div class="flex flex-wrap justify-center gap-2 w-full">
-          <button @click="openProfile" class="profile-btn">Profile</button>
-          <button @click="openSettings" class="profile-btn">Settings</button>
-          <button @click="authStore.logout" class="logout-btn">Sign out</button>
+          <Button
+              label="Profile"
+              icon="pi pi-user"
+              iconPos="right"
+              @click="openProfile"
+              class="profile-btn"
+              text
+          />
+          <Button
+              label="Settings"
+              icon="pi pi-cog"
+              iconPos="right"
+              @click="openSettings"
+              class="profile-btn"
+              text
+          />
+          <Button
+              label="Sign out"
+              icon="pi pi-sign-out"
+              iconPos="right"
+              @click="authStore.logout"
+              severity="danger"
+              variant="outlined"
+              class="w-full logout-btn"
+          />
         </div>
       </div>
 
       <div v-else class="flex flex-col gap-3">
-        <button @click="navigate('/login')" class="login-btn">Login</button>
-        <button @click="navigate('/register')" class="register-btn">Register</button>
+        <Button
+            label="Login"
+            @click="navigate('/login')"
+            severity="help"
+            class="login-btn"
+        />
+        <Button
+            label="Register"
+            @click="navigate('/register')"
+            severity="help"
+            outlined
+            class="register-btn"
+        />
       </div>
     </div>
 
     <nav class="flex flex-col gap-4 mt-4">
-      <button
+      <Button
+          label="Dashboard"
           @click="navigate('/dashboard')"
           :class="['nav-item', { 'active': isActive('/dashboard') }]"
-      >
-        Dashboard
-      </button>
+          severity="help"
+          text
+          class="justify-start"
+      />
 
-      <button
+      <Button
+          label="Groups"
           @click="navigate('/groups')"
           :class="['nav-item', { 'active': isActive('/groups') }]"
-      >
-        Groups
-      </button>
+          severity="help"
+          text
+          class="justify-start"
+      />
 
-      <button
+      <Button
+          label="Statistics"
           @click="navigate('/statistics')"
           :class="['nav-item', { 'active': isActive('/statistics') }]"
-      >
-        Statistics
-      </button>
+          severity="help"
+          text
+          class="justify-start"
+      />
     </nav>
   </div>
 
@@ -109,11 +150,6 @@ function isActive(path: string) {
 
 .close-button:hover {
   @apply bg-gray-600 text-white;
-}
-
-.avatar {
-  @apply w-20 h-20 rounded-full overflow-hidden border-2 border-purple-500/50;
-  box-shadow: 0 0 15px rgba(124, 58, 237, 0.3);
 }
 
 .profile-btn {

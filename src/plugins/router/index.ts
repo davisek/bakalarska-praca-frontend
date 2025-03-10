@@ -8,6 +8,10 @@ import Groups from "@/views/app@group/groups.vue";
 import { SensorGroup, Sensor as SensorType } from '@/types';
 import Login from "@/views/app@login/login.vue";
 import Register from "@/views/app@register/register.vue";
+import AdminUsers from "@/views/app@admin/app@users/admin-users.vue";
+import AdminSensors from "@/views/app@admin/app@sensors/admin-sensors.vue";
+import {showError} from "@/utils/notificationUtil.ts";
+import AdminDashboard from "@/views/app@admin/admin-dashboard.vue";
 
 const routes: Array<RouteRecordRaw> = [
     {
@@ -50,6 +54,29 @@ const routes: Array<RouteRecordRaw> = [
     },
 
     {
+        path: '/admin',
+        component: () => import('@/views/app@admin/a-admin-layout.vue'),
+        meta: { requiresAuth: true, requiresAdmin: true },
+        children: [
+            {
+                path: '',
+                name: 'AdminDashboard',
+                component: AdminDashboard,
+            },
+            {
+                path: 'users',
+                name: 'AdminUsers',
+                component: AdminUsers,
+            },
+            {
+                path: 'sensors',
+                name: 'AdminSensors',
+                component: AdminSensors,
+            },
+        ]
+    },
+
+    {
         path: '/:patMatch(.*)*',
         redirect: '/'
     }
@@ -62,11 +89,43 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
     const isAuthenticated = !!localStorage.getItem('auth_token');
+    const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+    const requiresAdmin = to.matched.some(record => record.meta.requiresAdmin);
 
-    if (to.meta.requiresAuth && !isAuthenticated) {
+    if (!requiresAuth) {
+        next();
+        return;
+    }
+
+    if (requiresAuth && !isAuthenticated) {
+        showError('You must be logged in to access this page');
         next({ name: 'Login' });
-    } else if (to.meta.hideForAuth && isAuthenticated) {
-        next({ name: 'Dashboard' });
+        return;
+    }
+
+    if (requiresAdmin) {
+        const userData = localStorage.getItem('user');
+
+        if (!userData) {
+            showError('Session data is missing. Please log in again.');
+            next({ name: 'Login' });
+            return;
+        }
+
+        try {
+            const user = JSON.parse(userData);
+
+            if (!user.is_admin) {
+                next({ name: 'Dashboard' });
+                return;
+            }
+
+            next();
+        } catch (error) {
+            console.error('Error parsing user data:', error);
+            showError('Session data is invalid. Please log in again.');
+            next({ name: 'Login' });
+        }
     } else {
         next();
     }

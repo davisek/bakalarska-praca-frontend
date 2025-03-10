@@ -139,21 +139,4 @@ const goToRegister = () => {
 </template>
 
 <style scoped>
-.p-inputtext:hover {
-  border-color: rgb(139, 92, 246) !important;
-}
-
-.p-inputtext:focus {
-  box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.5) !important;
-  border-color: rgb(139, 92, 246) !important;
-}
-
-:deep(.p-password input:hover) {
-  border-color: rgb(139, 92, 246);
-}
-
-:deep(.p-password input:focus) {
-  box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.5);
-  border-color: rgb(139, 92, 246);
-}
 </style>

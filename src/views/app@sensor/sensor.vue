@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import {ref} from "vue";
-import ASensorReadings from "@/components/a-sensor-readings.vue";
 import ADataGraph from "@/components/a-data-graph.vue";
 import ADataTable from "@/components/a-data-table.vue";
 import ABreadcrumb from "@/components/a-breadcrumb.vue";
+import ACurrentReading from "@/views/app@sensor/a-current-reading.vue";
 import { Sensor, TimeRangeOption } from '@/types';
 
 const props = defineProps({
@@ -127,13 +127,7 @@ updateTimeRange(1);
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div class="sensor-content">
         <h2 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300 pb-2 sensor-content-border">Current Reading</h2>
-        <div class="h-100 flex items-center justify-center pb-5">
-          <div class="rounded-full shadow-box p-1 gradient-component">
-            <div class="bg-gray-900 rounded-full text-center shadow-box p-10">
-              <ASensorReadings :sensor="props.sensor" />
-            </div>
-          </div>
-        </div>
+        <ACurrentReading :sensor="props.sensor" />
       </div>
 
       <div class="lg:col-span-2 sensor-content">

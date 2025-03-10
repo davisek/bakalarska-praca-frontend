@@ -1,7 +1,8 @@
 import { createApp } from 'vue'
+
 import PrimeVue from 'primevue/config';
 import 'primeicons/primeicons.css';
-import LaraDarkPurple from '@primeuix/themes/lara';
+import Aura from '@primeuix/themes/aura';
 import FocusTrap from 'primevue/focustrap';
 
 import ToggleButton from 'primevue/togglebutton';
@@ -16,8 +17,18 @@ import TabList from 'primevue/tablist';
 import Tab from 'primevue/tab';
 import TabPanels from 'primevue/tabpanels';
 import TabPanel from 'primevue/tabpanel';
+import Paginator from 'primevue/paginator';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import ColumnGroup from 'primevue/columngroup';
+import Row from 'primevue/row';
+import IconField from 'primevue/iconfield';
+import InputIcon from 'primevue/inputicon';
+import Tag from 'primevue/tag';
+import Dialog from 'primevue/dialog';
 
 import './style.css';
+import './primevue-style.css';
 import App from './App.vue';
 import router from './plugins/router';
 import { createPinia } from 'pinia';
@@ -38,9 +49,8 @@ const app = createApp(App)
     .use(i18n)
     .use(PrimeVue, {
         ripple: true,
-        inputStyle: 'filled',
         theme: {
-            preset: LaraDarkPurple,
+            preset: Aura,
         }
     });
 
@@ -56,6 +66,15 @@ app.component('TabList', TabList);
 app.component('Tab', Tab);
 app.component('TabPanels', TabPanels);
 app.component('TabPanel', TabPanel);
+app.component('Paginator', Paginator);
+app.component('DataTable', DataTable);
+app.component('Column', Column);
+app.component('ColumnGroup', ColumnGroup);
+app.component('Row', Row);
+app.component('IconField', IconField);
+app.component('InputIcon', InputIcon);
+app.component('Tag', Tag);
+app.component('Dialog', Dialog);
 
 app.directive('focustrap', FocusTrap);
 app.config.globalProperties.$axios = axiosInstance;

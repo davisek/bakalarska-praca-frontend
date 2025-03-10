@@ -25,27 +25,6 @@ export const useAuthStore = defineStore('auth', () => {
         }
     };
 
-    const verifyToken = async () => {
-        const token = localStorage.getItem('auth_token');
-        if (!token) {
-            isAuthenticated.value = false;
-            return false;
-        }
-
-        try {
-            await axiosInstance.get('/auth/verify-token');
-            return true;
-        } catch (err) {
-            if (err.response && err.response.status === 401) {
-                localStorage.removeItem('auth_token');
-                localStorage.removeItem('user');
-                isAuthenticated.value = false;
-                user.value = null;
-            }
-            return false;
-        }
-    };
-
     const login = async (credentials) => {
         loading.value = true;
 
@@ -116,9 +95,6 @@ export const useAuthStore = defineStore('auth', () => {
 
     const checkAuthOnInit = async () => {
         initializeAuth();
-        if (isAuthenticated.value) {
-            await verifyToken();
-        }
     };
 
     checkAuthOnInit();
@@ -130,7 +106,6 @@ export const useAuthStore = defineStore('auth', () => {
         login,
         logout,
         initializeAuth,
-        verifyToken,
         checkAuthOnInit
     };
 });

@@ -1,15 +1,21 @@
 <script setup lang="ts">
 import ANavbar from "@/components/a-navbar.vue";
-import {ref} from "vue";
+import { ref, computed } from "vue";
 import ANotification from "@/components/a-notification.vue";
 import AHamburgerMenu from "@/components/a-hamburger-menu.vue";
-import {useAuthStore} from "@/utils/authStore.ts";
+import { useAuthStore } from "@/utils/authStore.ts";
 import ASettingsModal from "@/views/app@settings/a-settings-modal.vue";
+import { useRoute } from 'vue-router';
 
+const route = useRoute();
 const isMobileMenuOpen = ref(false);
 const isSettingsModalOpen = ref(false);
 const activeSettingsTab = ref('notifications');
 const authStore = useAuthStore();
+
+const isAdminRoute = computed(() => {
+  return route.path.startsWith('/admin');
+});
 
 const toggleMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value;
@@ -39,7 +45,9 @@ const openNotificationSettings = () => openSettingsModal('notifications');
 </script>
 
 <template>
-  <div class="flex min-h-screen">
+  <router-view v-if="isAdminRoute" />
+
+  <div v-else class="flex min-h-screen">
     <div class="hidden lg:block sticky top-0 h-screen w-1/6 bg-gray-800 text-gray-300">
       <ANavbar
           @open-profile="openProfileSettings"
@@ -77,6 +85,7 @@ const openNotificationSettings = () => openSettingsModal('notifications');
   </div>
 
   <ASettingsModal
+      v-if="!isAdminRoute"
       :is-open="isSettingsModalOpen"
       :initial-tab="activeSettingsTab"
       @close="closeSettingsModal"

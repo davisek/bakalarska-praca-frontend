@@ -1,28 +1,61 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axiosInstance from "@/plugins/axios";
-import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
 import { useAuthStore } from "@/utils/authStore.ts";
+import Menu from 'primevue/menu';
 
 const router = useRouter();
 const route = useRoute();
 const groups = ref([]);
 const authStore = useAuthStore();
-
+const menu = ref(null);
 const emit = defineEmits(['open-profile', 'open-settings']);
 
 const isActive = (path: string) => {
   return route.path.includes(path);
 };
 
+const toggleMenu = (event) => {
+  menu.value.toggle(event);
+};
+
 const openProfile = () => {
   emit('open-profile');
+  menu.value.hide();
 };
 
 const openSettings = () => {
   emit('open-settings');
+  menu.value.hide();
 };
+
+
+const logout = () => {
+  authStore.logout();
+  menu.value.hide();
+};
+
+const menuItems = [
+  {
+    label: 'Your Profile',
+    icon: 'pi pi-user',
+    command: () => openProfile()
+  },
+  {
+    label: 'Settings',
+    icon: 'pi pi-cog',
+    command: () => openSettings()
+  },
+  {
+    separator: true
+  },
+  {
+    label: 'Sign out',
+    icon: 'pi pi-sign-out',
+    command: () => logout()
+  }
+];
 
 const fetchGroups = async () => {
   try {
@@ -51,43 +84,20 @@ onMounted(() => {
       </div>
 
       <div class="user-section">
-        <Menu v-if="authStore.isAuthenticated" as="div" class="profile-menu">
-          <MenuButton class="profile-button">
-            <div class="profile-avatar">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-              </svg>
-            </div>
-          </MenuButton>
-          <transition enter-active-class="transition ease-out duration-200" enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100" leave-active-class="transition ease-in duration-100" leave-from-class="transform opacity-100 scale-100" leave-to-class="transform opacity-0 scale-95">
-            <MenuItems class="dropdown-menu">
-              <MenuItem v-slot="{ active }">
-                <button
-                    @click="openProfile"
-                    :class="[active ? 'bg-gray-100' : '', 'dropdown-item w-full']"
-                >
-                  Your Profile
-                </button>
-              </MenuItem>
-              <MenuItem v-slot="{ active }">
-                <button
-                    @click="openSettings"
-                    :class="[active ? 'bg-gray-100' : '', 'dropdown-item w-full']"
-                >
-                  Settings
-                </button>
-              </MenuItem>
-              <MenuItem v-slot="{ active }">
-                <button
-                    @click="authStore.logout"
-                    :class="[active ? 'bg-gray-100' : '', 'dropdown-item logout text-center']"
-                >
-                  Sign out
-                </button>
-              </MenuItem>
-            </MenuItems>
-          </transition>
-        </Menu>
+        <div v-if="authStore.isAuthenticated" class="profile-menu">
+          <Button
+              @click="toggleMenu"
+              severity="help"
+              aria-label="User menu"
+              aria-haspopup="true"
+              aria-controls="overlay_menu"
+          >
+            <template #icon>
+              <i class="pi pi-list" style="font-size: 1.2rem; padding: 2px"></i>
+            </template>
+          </Button>
+          <Menu ref="menu" id="overlay_menu" :model="menuItems" :popup="true" />
+        </div>
         <router-link v-else to="/login" class="login-button shadow-glow animate-pulse-glow pulse-subtle">
           Login
         </router-link>
@@ -146,30 +156,6 @@ onMounted(() => {
 
 .user-section {
   @apply mb-8 w-full flex justify-center;
-}
-
-.profile-menu {
-  @apply relative;
-}
-
-.profile-button {
-  @apply flex items-center justify-center rounded-full p-2 bg-gray-700 hover:bg-gray-600 transition-colors duration-200;
-}
-
-.profile-avatar {
-  @apply w-8 h-8 text-gray-200;
-}
-
-.dropdown-menu {
-  @apply absolute left-0 z-10 mt-2 w-40 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none;
-}
-
-.dropdown-item {
-  @apply block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:rounded-md;
-}
-
-.logout {
-  @apply text-red-600 w-full text-left;
 }
 
 .login-button {
