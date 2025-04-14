@@ -33,9 +33,9 @@ const fetchSensorData = async () => {
     errorMessage.value = null;
   } catch (err) {
     errorMessage.value = `Failed to load ${props.sensor.type} data.`;
-    console.error(err);
   } finally {
     isLoading.value = false;
+    sensorData.symbol = props.sensor.unit_of_measurement;
   }
 };
 
