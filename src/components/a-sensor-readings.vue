@@ -30,11 +30,9 @@ const fetchSensorData = async () => {
     sensorData.value = response.value;
     sensorData.symbol = response.symbol;
     sensorData.created_at = response.created_at;
-    console.log(sensorData)
     errorMessage.value = null;
   } catch (err) {
     errorMessage.value = `Failed to load ${props.sensor.type} data.`;
-    console.error(err);
   } finally {
     isLoading.value = false;
   }
