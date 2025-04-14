@@ -4,12 +4,12 @@ import { useRouter } from 'vue-router';
 import axiosInstance from '@/plugins/axios';
 import ABreadcrumb from "@/components/a-breadcrumb.vue";
 import { showSuccess, showError } from '@/utils/notificationUtil';
-import {Locales} from "@/types";
+import {Enum} from "@/types";
 
 const router = useRouter();
 const isLoading = ref(false);
 const formSubmitted = ref(false);
-const locales = ref<Locales>(null)
+const locales = ref<Enum>(null)
 
 const form = ref({
   name: '',

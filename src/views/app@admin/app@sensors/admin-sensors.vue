@@ -3,11 +3,14 @@ import { ref, onMounted } from 'vue';
 import ABreadcrumb from "@/components/a-breadcrumb.vue";
 import axiosInstance from "@/plugins/axios";
 import { showSuccess, showError } from "@/utils/notificationUtil";
-import { SensorGroup, Sensor } from '@/types';
+import {SensorGroup, Sensor, Enum} from '@/types';
 import ALoadingScreen from "@/components/a-loading-screen.vue";
 import FileUpload from 'primevue/fileupload';
+import {RouterLink} from "vue-router";
 
 const groups = ref<SensorGroup[]>([]);
+const colorClasses = ref<Enum>(null)
+
 const isLoading = ref(true);
 const expandedGroups = ref<Set<string>>(new Set());
 const src = ref(null);
@@ -35,6 +38,7 @@ const sensorForm = ref({
   type: '',
   display_name: '',
   unit_of_measurement: '',
+  is_output_binary: false,
   icon_path: '',
   image_path: '',
   color_class: '',
@@ -42,6 +46,18 @@ const sensorForm = ref({
   icon: null as File | null,
   image: null as File | null,
 });
+
+const loadColorClasses = async () => {
+  isLoading.value = true;
+  try {
+    const response = await axiosInstance.get('/sensors/meta-data');
+    colorClasses.value = response.color_classes;
+  } catch (error) {
+    showError('Failed to load color classes');
+  } finally {
+    isLoading.value = false;
+  }
+};
 
 const loadGroups = async () => {
   isLoading.value = true;
@@ -100,9 +116,10 @@ const openSensorDialog = (sensor: Sensor | null = null, groupId: any = null) => 
       type: sensor.type,
       display_name: sensor.display_name,
       unit_of_measurement: sensor.unit_of_measurement,
+      is_output_binary: sensor.is_output_binary,
       icon_path: sensor.icon_path || '',
       image_path: sensor.image_path || '',
-      color_class: sensor.color_class || '',
+      color_class: sensor.color_class.value || '',
       group_id: groupId,
       icon: null,
       image: null,
@@ -114,6 +131,7 @@ const openSensorDialog = (sensor: Sensor | null = null, groupId: any = null) => 
       type: '',
       display_name: '',
       unit_of_measurement: '',
+      is_output_binary: false,
       icon_path: '',
       image_path: '',
       color_class: '',
@@ -234,8 +252,9 @@ const saveSensor = async () => {
     formData.append('sensor_name', sensorForm.value.sensor_name);
     formData.append('type', sensorForm.value.type);
     formData.append('display_name', sensorForm.value.display_name);
-    formData.append('color_class', sensorForm.value.color_class || '');
+    formData.append('color_class', sensorForm.value.color_class);
     formData.append('unit_of_measurement', sensorForm.value.unit_of_measurement || '');
+    formData.append('is_output_binary', sensorForm.value.is_output_binary ? 1 : 0);
     formData.append('sensor_group_id', sensorForm.value.group_id);
 
     if (selectedSensor.value) {
@@ -342,6 +361,7 @@ const deleteSensor = async () => {
 
 onMounted(() => {
   loadGroups();
+  loadColorClasses();
 });
 </script>
 
@@ -420,19 +440,38 @@ onMounted(() => {
           </div>
 
           <DataTable v-else :value="group.sensors" stripedRows responsiveLayout="scroll">
-            <Column field="type" header="Type">
+            <Column
+                field="type"
+                header="Type"
+                :headerStyle="{ width: '28%' }"
+            >
               <template #body="{ data }">
-                <div class="flex items-center">
+                <div class="flex">
                   <img v-if="data.icon_path" :src="data.icon_path" :alt="data.sensor_name" class="w-6 h-6 mr-2" />
                   <span>{{ data.type }}</span>
                 </div>
               </template>
             </Column>
-            <Column field="sensor_name" header="Name" />
-            <Column field="display_name" header="Display Name" />
-            <Column header="Actions">
+            <Column
+                field="sensor_name"
+                header="Name"
+                :headerStyle="{ width: '28%' }"
+            >
+            </Column>
+            <Column
+                field="display_name"
+                header="Display name"
+                :headerStyle="{ width: '28%' }"
+            >
+            </Column>
+            <Column
+                :headerStyle="{ width: '16%' }"
+            >
+              <template #header>
+                <div style="width: 100%; text-align: center; font-weight: 600;">Actions</div>
+              </template>
               <template #body="{ data }">
-                <div class="flex gap-2">
+                <div class="flex gap-2 justify-center">
                   <Button
                       icon="pi pi-pencil"
                       text
@@ -501,7 +540,7 @@ onMounted(() => {
       </div>
 
       <template #footer>
-        <Button label="Cancel" icon="pi pi-times" text @click="groupDialog = false" />
+        <Button label="Cancel" icon="pi pi-times" text @click="groupDialog = false" severity="danger" />
         <Button label="Save" icon="pi pi-check" @click="saveGroup" severity="success" />
       </template>
     </Dialog>
@@ -524,7 +563,7 @@ onMounted(() => {
           <InputText id="sensorType" v-model="sensorForm.type" required class="w-full"
                      placeholder="e.g. temperature"
           />
-          <small v-if="!selectedSensor" class="text-gray-400">Unique identifier for this sensor</small>
+          <small v-if="!selectedSensor" class="text-gray-400">Unique identifier for this sensor for MQTT topic. You will after use {type}-data name for topic.</small>
         </div>
 
         <div class="field">
@@ -538,9 +577,27 @@ onMounted(() => {
         </div>
 
         <div class="field">
-          <label for="colorClass" class="block mb-2 text-gray-300">Color Class</label>
-          <InputText id="colorClass" v-model="sensorForm.color_class" class="w-full" placeholder="temperature-card" />
-          <small class="text-gray-400">CSS class for styling (e.g. temperature-card, humidity-card)</small>
+          <label for="isOutputBinary" class="block mb-2 text-gray-300">Is output 0/1?</label>
+          <ToggleSwitch v-model="sensorForm.is_output_binary">
+            <template #handle="{ checked }">
+              <i :class="['!text-xs pi', { 'pi-check': checked, 'pi-times': !checked }]" />
+            </template>
+          </ToggleSwitch>
+        </div>
+
+        <div class="field">
+          <Select
+              v-model="sensorForm.color_class"
+              :options="colorClasses"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Select a color class"
+              checkmark
+              :highlightOnSelect="false"
+              class="w-full"
+          >
+          </Select>
+          <small class="text-gray-400">CSS class for styling</small>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -589,7 +646,7 @@ onMounted(() => {
       </div>
 
       <template #footer>
-        <Button label="Cancel" icon="pi pi-times" text @click="sensorDialog = false" />
+        <Button label="Cancel" icon="pi pi-times" text @click="sensorDialog = false" severity="danger" />
         <Button label="Save" icon="pi pi-check" @click="saveSensor" severity="success" />
       </template>
     </Dialog>

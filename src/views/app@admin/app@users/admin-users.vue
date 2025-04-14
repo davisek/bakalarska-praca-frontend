@@ -206,9 +206,14 @@ onMounted(() => {
             </template>
           </Column>
 
-          <Column header="Actions">
+          <Column
+              :bodyStyle="{ textAlign: 'center' }"
+          >
+            <template #header>
+              <div style="width: 100%; text-align: center; font-weight: 600;">Actions</div>
+            </template>
             <template #body="{ data }">
-              <div class="flex gap-2">
+              <div class="flex gap-2 justify-center">
                 <Button
                     icon="pi pi-trash"
                     severity="danger"

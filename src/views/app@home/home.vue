@@ -52,7 +52,7 @@ const route = useRoute();
             :key="sensor.type"
             :to="`${route.path}/${group.group_value}/${sensor.type}`"
             class="sensor-card group relative overflow-hidden"
-            :class="sensor.color_class || 'default-card'"
+            :class="sensor.color_class.value || 'default-card'"
         >
           <div class="absolute inset-0"></div>
           <div class="relative z-10 flex flex-col h-full">

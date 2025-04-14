@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref, onMounted, watch, reactive} from 'vue';
+import {ref, onMounted, watch, reactive, onUnmounted} from 'vue';
 import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement } from 'chart.js';
 import { Line } from 'vue-chartjs';
 import CrosshairPlugin from "chartjs-plugin-crosshair"
@@ -30,6 +30,8 @@ const statistics = reactive<SensorStatistics>({
   min: null,
   max: null,
 });
+
+const chartRef = ref(null);
 
 const symbol = ref('');
 const percentageDifference = ref<number | null>(null);
@@ -196,8 +198,22 @@ const loadChartData = async () => {
   }
 };
 
+const resizeChart = () => {
+  if (chartRef.value) {
+    const chartInstance = chartRef.value.chart;
+    if (chartInstance) {
+      chartInstance.resize();
+    }
+  }
+};
+
 onMounted(async () => {
   await loadChartData();
+  document.addEventListener('fullscreenchange', () => {
+    setTimeout(resizeChart, 100);
+  });
+
+  resizeChart();
 });
 
 watch([() => props.fromDate, () => props.toDate], () => {
@@ -206,6 +222,10 @@ watch([() => props.fromDate, () => props.toDate], () => {
 
 watch(() => props.sensor.type, () => {
   loadChartData();
+});
+
+onUnmounted(() => {
+  document.removeEventListener('fullscreenchange', resizeChart);
 });
 </script>
 
@@ -224,12 +244,13 @@ watch(() => props.sensor.type, () => {
             class="expand-button mr-4"
             title="Toggle fullscreen"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 ml-1 mt-1">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
           </svg>
         </button>
         <div class="p-4 h-96" ref="chartContainerRef">
           <Line
+              ref="chartRef"
               :data="{
               labels: chartLabels,
               datasets: [

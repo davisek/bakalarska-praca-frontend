@@ -3,6 +3,7 @@ import { ref, onMounted, watch, computed } from 'vue';
 import axiosInstance from '@/plugins/axios';
 import { showSuccess, showError } from '@/utils/notificationUtil';
 import ANotification from "@/components/a-notification.vue";
+import {NotificationSetting} from "@/types";
 
 const props = defineProps({
   isOpen: {
@@ -11,10 +12,9 @@ const props = defineProps({
   }
 });
 
+const notificationSettings = ref<NotificationSetting[]>([]);
 const loading = ref(true);
 const savingNotifications = ref(false);
-const notificationSettings = ref([]);
-
 const allEnabled = ref(false);
 
 const areAllNotificationsEnabled = computed(() => {
@@ -41,7 +41,10 @@ const saveNotificationSettings = async () => {
 
     const updates = notificationSettings.value.map(setting => ({
       id: setting.id,
-      email_notification_allowed: setting.email_notification_allowed
+      email_notification_allowed: setting.email_notification_allowed,
+      threshold: setting.threshold,
+      cooldown: setting.cooldown,
+      min_unit_diff: setting.min_unit_diff,
     }));
 
     const response = await axiosInstance.put('/settings', { settings: updates });
@@ -52,11 +55,8 @@ const saveNotificationSettings = async () => {
     }
     savingNotifications.value = false;
   } catch (error) {
-    if (error.response && error.response.data) {
-      showError(error.response.data.message);
-    } else {
-      showError('Failed to update notification settings');
-    }
+    const firstError = Object.values(error.response.data.errors)[0];
+    showError(Array.isArray(firstError) ? firstError[0] : 'Validation error');
   } finally {
     savingNotifications.value = false;
   }
@@ -114,7 +114,7 @@ onMounted(() => {
           <div class="flex items-center space-x-4">
             <div
                 class="w-12 h-12 rounded-full p-2 flex items-center justify-center"
-                :class="setting.sensor.color_class"
+                :class="setting.sensor.color_class.value"
             >
               <img
                   v-if="setting.sensor.icon_path"
@@ -130,13 +130,91 @@ onMounted(() => {
             </div>
           </div>
 
-          <div class="card flex justify-center">
-            <ToggleSwitch v-model="setting.email_notification_allowed">
-              <template #handle="{ checked }">
-                <i :class="['!text-xs pi', { 'pi-check': checked, 'pi-times': !checked }]" />
-              </template>
-            </ToggleSwitch>
+          <div class="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0">
+            <div class="w-16 flex justify-start md:justify-center">
+              <ToggleSwitch v-model="setting.email_notification_allowed">
+                <template #handle="{ checked }">
+                  <i :class="['!text-xs pi', { 'pi-check': checked, 'pi-times': !checked }]" />
+                </template>
+              </ToggleSwitch>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="w-32" v-if="!setting.sensor.is_output_binary">
+                <label class="text-sm text-gray-300 block mb-1">Threshold (%)</label>
+                <InputNumber
+                    v-model="setting.threshold"
+                    :disabled="!setting.email_notification_allowed"
+                    class="w-full p-1 rounded bg-gray-700 text-white"
+                    variant="outlined"
+                    showButtons
+                    buttonLayout="vertical"
+                    suffix=" %"
+                    :max-fraction-digits="2"
+                    :min="1"
+                    :max="100"
+                    :step="0.01"
+                >
+                  <template #incrementbuttonicon>
+                    <span class="pi pi-plus" />
+                  </template>
+                  <template #decrementbuttonicon>
+                    <span class="pi pi-minus" />
+                  </template>
+                </InputNumber>
+              </div>
+              <div v-else class="hidden sm:block w-32"></div>
+
+              <div class="w-32" v-if="!setting.sensor.is_output_binary">
+                <label class="text-sm text-gray-300 block mb-1">Min Unit Diff</label>
+                <InputNumber
+                    v-model="setting.min_unit_diff"
+                    :disabled="!setting.email_notification_allowed"
+                    type="number"
+                    class="w-full p-1 rounded bg-gray-700 text-white"
+                    variant="outlined"
+                    showButtons
+                    buttonLayout="vertical"
+                    :suffix="' ' + setting.sensor.unit_of_measurement"
+                    :max-fraction-digits="2"
+                    :max="99.99"
+                    :step="0.01"
+                >
+                  <template #incrementbuttonicon>
+                    <span class="pi pi-plus" />
+                  </template>
+                  <template #decrementbuttonicon>
+                    <span class="pi pi-minus" />
+                  </template>
+                </InputNumber>
+              </div>
+              <div v-else class="hidden sm:block w-32"></div>
+
+              <div class="w-32">
+                <label class="text-sm text-gray-300 block mb-1">Cooldown</label>
+                <InputNumber
+                    v-model="setting.cooldown"
+                    :disabled="!setting.email_notification_allowed"
+                    type="number"
+                    class="w-full p-1 rounded bg-gray-700 text-white"
+                    variant="outlined"
+                    showButtons
+                    buttonLayout="vertical"
+                    suffix=" h"
+                    :min="1"
+                    :step="1"
+                >
+                  <template #incrementbuttonicon>
+                    <span class="pi pi-plus" />
+                  </template>
+                  <template #decrementbuttonicon>
+                    <span class="pi pi-minus" />
+                  </template>
+                </InputNumber>
+              </div>
+            </div>
           </div>
+
         </div>
       </div>
 

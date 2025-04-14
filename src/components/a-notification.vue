@@ -72,8 +72,6 @@ const closeNotification = (id: number) => {
           :key="notification.id"
           :class="`rounded-lg shadow-lg p-4 mb-2 flex items-start ${getNotificationClasses(notification.type)}`"
       >
-        <v-icon :icon="getNotificationIcon(notification.type)" class="mr-3 mt-0.5" />
-
         <div class="flex-grow">
           <p class="text-white font-medium">{{ notification.message }}</p>
         </div>
@@ -82,7 +80,6 @@ const closeNotification = (id: number) => {
             @click="closeNotification(notification.id)"
             class="ml-auto text-white opacity-70 hover:opacity-100"
         >
-          <v-icon icon="mdi-close" size="small" />
         </button>
       </div>
     </transition-group>

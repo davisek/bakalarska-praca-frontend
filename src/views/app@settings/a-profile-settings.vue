@@ -4,7 +4,7 @@ import axiosInstance from '@/plugins/axios';
 import { showSuccess, showError } from '@/utils/notificationUtil';
 import ANotification from "@/components/a-notification.vue";
 import ALoadingScreen from "@/components/a-loading-screen.vue";
-import {Locales, User} from "@/types";
+import {Enum, User} from "@/types";
 import {formatDateTime} from "@/utils/dateUtil.ts";
 
 const props = defineProps({
@@ -17,7 +17,7 @@ const props = defineProps({
 const isLoading = ref(true);
 const savingProfile = ref(false);
 const changingPassword = ref(false);
-const locales = ref<Locales>(null)
+const locales = ref<Enum>(null)
 const isVerificationModalOpen = ref(false);
 const verificationCode = ref('');
 const sendingVerification = ref(false);
@@ -31,6 +31,7 @@ const profileForm = ref({
   email: '',
   email_verified_at: '',
   locale: '',
+  dark_mode: false,
 });
 
 const passwordForm = ref({
@@ -50,6 +51,7 @@ const fetchUserProfile = async () => {
     profileForm.value.email = user.value.email;
     profileForm.value.email_verified_at = user.value.email_verified_at;
     profileForm.value.locale = user.value.locale.value;
+    profileForm.value.dark_mode = user.value.dark_mode;
 
     isLoading.value = false;
   } catch (error) {
@@ -68,6 +70,7 @@ const saveProfileInfo = async () => {
     if (profileForm.value.surname) formProfileData.surname = profileForm.value.surname;
     if (profileForm.value.email) formProfileData.email = profileForm.value.email;
     if (profileForm.value.locale) formProfileData.locale = profileForm.value.locale;
+    formProfileData.dark_mode = profileForm.value.dark_mode;
 
     const response = await axiosInstance.put('/user', formProfileData);
     showSuccess(response.message);
@@ -199,7 +202,7 @@ const resendVerificationCode = async () => {
     } else {
       showError(response.message);
     }
-  } catch (error) {
+  } catch (error: any) {
     if (error.response && error.response.data) {
       showError(error.response.data.message);
     } else {
@@ -267,7 +270,7 @@ onMounted(() => {
           />
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3">
           <div class="space-y-2">
             <label class="block font-medium text-gray-300">Language</label>
             <SelectButton
@@ -289,6 +292,20 @@ onMounted(() => {
                 </div>
               </template>
             </SelectButton>
+          </div>
+
+          <div class="space-y-2">
+            <label class="block font-medium text-gray-300">Website theme</label>
+            <ToggleButton
+                :modelValue="!Boolean(profileForm.dark_mode)"
+                @update:modelValue="profileForm.dark_mode = !$event"
+                onLabel="Light"
+                offLabel="Dark"
+                onIcon="pi pi-sun"
+                offIcon="pi pi-moon"
+                class="p-button-sm"
+                aria-label="Toggle theme"
+            />
           </div>
 
           <div class="space-y-2">
@@ -406,7 +423,7 @@ onMounted(() => {
           <InputText
               v-model="verificationCode"
               class="w-full"
-              maxlength="6"
+              maxlength="5"
               placeholder="Enter 5-digit code"
           />
         </div>

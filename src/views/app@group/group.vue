@@ -20,7 +20,7 @@ const route = useRoute();
     <div
         v-for="sensor in props.sensors"
         :key="sensor.type"
-        :class="[(sensor.color_class || 'default-card'), 'sensor-card']"
+        :class="[(sensor.color_class.value || 'default-card'), 'sensor-card']"
     >
       <router-link
           :to="`${route.path}/${sensor.type}`"

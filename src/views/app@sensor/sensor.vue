@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref} from "vue";
+import {onBeforeUnmount, onMounted, ref, watch} from "vue";
 import ADataGraph from "@/components/a-data-graph.vue";
 import ADataTable from "@/components/a-data-table.vue";
 import ABreadcrumb from "@/components/a-breadcrumb.vue";
@@ -29,19 +29,54 @@ const selectedTimeRange = ref<number | string | null>(1);
 const fromDate = ref('');
 const toDate = ref('');
 
+const dates = ref<[Date, Date] | null>(null);
+
+const isTimeRangeMenuOpen = ref(false);
+
 const updateTimeRange = (range: number | string) => {
   selectedTimeRange.value = range;
-
   const now = new Date();
+  toDate.value = now.toISOString().slice(0, 10);
+
   if (range === "max") {
     fromDate.value = "";
+    dates.value = null;
   } else {
-    const daysAsNumber = typeof range === 'number' ? range : parseInt(range as string);
-    const newFromDate = new Date(now.getTime() - daysAsNumber * 24 * 60 * 60 * 1000);
-    fromDate.value = newFromDate.toISOString();
+    const days = typeof range === 'number' ? range : parseInt(range as string);
+    const newFromDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+    fromDate.value = newFromDate.toISOString().slice(0, 10);
+    dates.value = [ newFromDate, now ];
   }
-  toDate.value = now.toISOString();
 };
+
+const formatLocalDateSkIso = (date: Date): string => {
+  const parts = date.toLocaleDateString('sk', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).split('. ');
+  return `${parts[2]}-${parts[1]}-${parts[0]}`;
+};
+
+watch(dates, (newDates) => {
+  if (newDates && newDates.length === 2) {
+    fromDate.value = formatLocalDateSkIso(newDates[0]);
+    toDate.value = formatLocalDateSkIso(newDates[1]);
+  }
+  console.log(toDate.value);
+});
+
+const closeTimeRangeMenu = () => {
+  isTimeRangeMenuOpen.value = false;
+};
+
+onMounted(() => {
+  window.addEventListener('scroll', closeTimeRangeMenu);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', closeTimeRangeMenu);
+});
 
 updateTimeRange(1);
 </script>
@@ -64,63 +99,6 @@ updateTimeRange(1);
             <p class="text-gray-400 text-sm">Sensor ID: {{ props.sensor.type }}</p>
           </div>
         </div>
-
-        <div class="w-full lg:w-auto flex flex-col space-y-3">
-          <div class="mb-3">
-            <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-9 gap-2">
-              <button
-                  v-for="range in timeRanges"
-                  :key="range.label"
-                  @click="updateTimeRange(range.value)"
-                  :class="[
-                    'px-2 py-1.5 rounded-md text-sm transition-all duration-200 text-center border',
-                    selectedTimeRange === range.value
-                      ? 'bg-purple-600 text-white btn-border'
-                      : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
-                  ]"
-              >
-                {{ range.label }}
-              </button>
-            </div>
-          </div>
-
-          <div class="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-2">
-            <div class="relative w-full sm:w-auto">
-              <div class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <input
-                  type="date"
-                  id="from"
-                  v-model="fromDate"
-                  class="w-full sm:w-40 bg-gray-800 border border-gray-700 text-white text-sm rounded-md focus:ring-purple-500 focus:border-purple-500 block pl-8 p-1.5 hover:border-gray-600 transition-colors"
-                  placeholder="From date"
-                  @click="selectedTimeRange = null"
-              />
-            </div>
-
-            <span class="text-gray-400">to</span>
-
-            <div class="relative w-full sm:w-auto">
-              <div class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <input
-                  type="date"
-                  id="to"
-                  v-model="toDate"
-                  class="w-full sm:w-40 bg-gray-800 border border-gray-700 text-white text-sm rounded-md focus:ring-purple-500 focus:border-purple-500 block pl-8 p-1.5 hover:border-gray-600 transition-colors"
-                  placeholder="To date"
-                  @click="selectedTimeRange = null"
-              />
-            </div>
-          </div>
-        </div>
-
       </div>
     </div>
 
@@ -142,6 +120,53 @@ updateTimeRange(1);
     </div>
 
   </div>
+
+  <div class="fixed top-4 right-16 lg:top-10 lg:right-4 z-50">
+    <Button
+        icon="pi pi-clock"
+        class="h-10"
+        @click="isTimeRangeMenuOpen = !isTimeRangeMenuOpen"
+        variant="outlined"
+        severity="help"
+    />
+  </div>
+
+  <Dialog
+      v-model:visible="isTimeRangeMenuOpen"
+      header="Select Time Range"
+      :modal="false"
+      closable
+      style="position: fixed; top:10px; right:10px; width: 300px;"
+  >
+    <div class="p-4">
+      <div class="grid grid-cols-3 gap-2 mb-6">
+        <button
+            v-for="range in timeRanges"
+            :key="range.label"
+            @click="updateTimeRange(range.value)"
+            :class="[
+                    'px-2 py-1.5 rounded-md text-sm transition-all duration-200 text-center border',
+                    selectedTimeRange === range.value
+                      ? 'bg-purple-600 text-white btn-border'
+                      : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
+                  ]"
+        >
+          {{ range.label }}
+        </button>
+      </div>
+      <DatePicker
+          v-model="dates"
+          size="small"
+          showIcon
+          selectionMode="range"
+          :manualInput="false"
+          class="w-full"
+          variant="outlined"
+          :maxDate="new Date()"
+          :hideOnRangeSelection="true"
+      />
+    </div>
+  </Dialog>
 </template>
 <style scoped>
 .gradient-subtle {
@@ -152,11 +177,6 @@ updateTimeRange(1);
 .btn-border {
   border: 1px solid;
   border-color: rgb(255, 255, 255, 0.2) !important;
-}
-
-input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(0.8) brightness(0.8) sepia(0.2) hue-rotate(240deg);
-  cursor: pointer;
 }
 
 .sensor-content {

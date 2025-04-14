@@ -80,7 +80,6 @@ onUnmounted(() => {
 <template>
   <div>
     <ALoadingScreen :is-loading="isLoading" />
-    <AErrorMessage :errorMessage="errorMessage" />
 
     <div class="lg:flex flex-none justify-center lg:ml-2 ml-0">
       <div class="w-full lg:w-5/6">

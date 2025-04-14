@@ -3,12 +3,16 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import ABreadcrumb from "@/components/a-breadcrumb.vue";
 import { useAuthStore } from '@/utils/authStore';
+import AResetPassword from "@/views/app@login/a-reset-password.vue";
+import ANotification from "@/components/a-notification.vue";
 
 const router = useRouter();
 const authStore = useAuthStore();
 const emailError = ref('');
 const passwordError = ref('');
 const formSubmitted = ref(false);
+
+const isForgotPasswordModalOpen = ref(false);
 
 const form = ref({
   email: '',
@@ -62,6 +66,10 @@ const onSubmit = async () => {
   }
 };
 
+const openForgotPasswordModal = () => {
+  isForgotPasswordModalOpen.value = true;
+};
+
 const goToRegister = () => {
   router.push('/register');
 };
@@ -113,7 +121,9 @@ const goToRegister = () => {
             </div>
 
             <div class="flex justify-end mb-4">
-              <a href="#" class="text-sm text-purple-300 hover:text-purple-200">Forgot password?</a>
+              <a  @click="openForgotPasswordModal" class="text-sm text-purple-300 hover:text-purple-200">
+                Forgot password?
+              </a>
             </div>
 
             <div class="mb-4">
@@ -129,14 +139,30 @@ const goToRegister = () => {
 
             <div class="text-center mt-2 text-sm text-gray-400">
               Don't have an account?
-              <a @click="goToRegister" class="ml-1 text-purple-300 hover:text-purple-200 cursor-pointer">Sign up</a>
+              <a @click="goToRegister" class="ml-1 text-purple-300 hover:text-purple-200 cursor-pointer">
+                Sign up
+              </a>
             </div>
           </Form>
         </div>
+
+        <Dialog
+            v-model:visible="isForgotPasswordModalOpen"
+            header="Reset your password"
+            :modal="true"
+            :closable="true"
+            :closeOnEscape="true"
+        >
+          <AResetPassword @close="isForgotPasswordModalOpen = false"/>
+        </Dialog>
+
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+a {
+  cursor: pointer;
+}
 </style>

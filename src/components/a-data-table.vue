@@ -62,7 +62,7 @@ const fetchRawData = async () => {
       page: paginationMeta.value.current_page,
       per_page: paginationMeta.value.per_page,
       sort_by: sortField.value,
-      sort_dir: sortOrder.value === 1 ? 'asc' : 'desc',
+      sort_dir: sortOrder.value === 1 ? 'desc' : 'asc',
     };
 
     if (props.fromDate) params.from = props.fromDate;
@@ -165,10 +165,13 @@ watch(() => props.sensor.type, () => {
 
           <Column
               field="value"
-              header="Value"
-              :style="{ width: '33%' }"
               sortable
+              :headerStyle="{ width: '33%' }"
+              :bodyStyle="{ textAlign: 'center' }"
           >
+            <template #header>
+              <div style="width: 100%; text-align: center; font-weight: 600;">Value</div>
+            </template>
             <template #body="{ data }">
               <span class="font-bold">{{ data.value }}</span>
               <span class="text-gray-400 text-sm ml-1">{{ data.symbol }}</span>
@@ -177,10 +180,13 @@ watch(() => props.sensor.type, () => {
 
           <Column
               field="created_at"
-              header="Recorded at"
-              :style="{ width: '33%' }"
               sortable
+              :headerStyle="{ width: '33%' }"
+              :bodyStyle="{ textAlign: 'center' }"
           >
+            <template #header>
+              <div style="width: 100%; text-align: center; font-weight: 600;">Recorded at</div>
+            </template>
             <template #body="{ data }">
               {{ formatDateTime(data.created_at) }}
             </template>
@@ -188,9 +194,12 @@ watch(() => props.sensor.type, () => {
 
           <Column
               field="percentageChange"
-              header="Percentage change"
-              :style="{ width: '33%' }"
+              :headerStyle="{ width: '33%' }"
+              :bodyStyle="{ textAlign: 'center' }"
           >
+            <template #header>
+              <div style="width: 100%; text-align: center; font-weight: 600;">Percentage change</div>
+            </template>
             <template #body="{ data }">
               <span v-if="data.percentageChange !== null"
                     :class="data.percentageChange > 0 ? 'text-green-400' :

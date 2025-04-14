@@ -26,6 +26,9 @@ import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
 import Tag from 'primevue/tag';
 import Dialog from 'primevue/dialog';
+import InputNumber from "primevue/inputnumber";
+import DatePicker from "primevue/datepicker";
+import Select from "primevue/select";
 
 import './style.css';
 import './primevue-style.css';
@@ -73,8 +76,11 @@ app.component('ColumnGroup', ColumnGroup);
 app.component('Row', Row);
 app.component('IconField', IconField);
 app.component('InputIcon', InputIcon);
+app.component('InputNumber', InputNumber);
 app.component('Tag', Tag);
 app.component('Dialog', Dialog);
+app.component('DatePicker', DatePicker);
+app.component('Select', Select);
 
 app.directive('focustrap', FocusTrap);
 app.config.globalProperties.$axios = axiosInstance;

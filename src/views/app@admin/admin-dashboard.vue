@@ -5,6 +5,7 @@ import axiosInstance from '@/plugins/axios';
 import ABreadcrumb from '@/components/a-breadcrumb.vue';
 import {StatisticData} from "@/types";
 import ALoadingScreen from "@/components/a-loading-screen.vue";
+import AAdminLogs from "@/views/app@admin/a-admin-logs.vue";
 
 const router = useRouter();
 const stats = ref<StatisticData>({
@@ -48,7 +49,7 @@ onMounted(() => {
         Admin Dashboard
       </h1>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div class="stat-card" @click="navigateTo('/admin/users')">
           <div class="icon-wrapper bg-blue-900/30 text-blue-400">
             <i class="pi pi-users text-2xl"></i>
@@ -77,13 +78,26 @@ onMounted(() => {
 
         <div class="stat-card" @click="navigateTo('/admin/sensors')">
           <div class="icon-wrapper bg-emerald-900/30 text-emerald-400">
-            <i class="pi pi-tablet text-2xl"></i>
+            <i class="pi pi-microchip text-2xl"></i>
           </div>
           <div>
             <h3 class="stat-label">Total Sensors</h3>
             <div class="stat-value">{{ stats.total_sensors }}</div>
             <div class="stat-info">
               <span class="text-emerald-400">{{ stats.new_readings_today }}</span> new readings today
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="icon-wrapper bg-red-900/30 text-red-400">
+            <i class="pi pi-receipt text-2xl"></i>
+          </div>
+          <div>
+            <h3 class="stat-label">Total Logs</h3>
+            <div class="stat-value">{{ stats.total_logs }}</div>
+            <div class="stat-info">
+              <span class="text-emerald-400">+{{ stats.new_logs_today }}</span> new today
             </div>
           </div>
         </div>
@@ -110,6 +124,9 @@ onMounted(() => {
         />
       </div>
     </div>
+
+    <AAdminLogs />
+
   </div>
 </template>
 

@@ -10,6 +10,7 @@ export interface User {
         symbol: string;
     };
     is_admin: boolean;
+    dark_mode: boolean;
     created_at: string;
 }
 
@@ -20,9 +21,10 @@ export interface Sensor {
     type: string;
     display_name: string;
     unit_of_measurement: string;
+    is_output_binary: boolean;
     icon_path?: string;
     image_path?: string;
-    color_class?: string;
+    color_class?: Enum;
     group_id?: number;
 }
 
@@ -42,6 +44,16 @@ export interface SensorReading {
     symbol: string;
     created_at: string;
     percentageChange?: number | null;
+}
+
+// Notification setting interface
+export interface NotificationSetting {
+    id: number;
+    email_notification_allowed: boolean;
+    threshold: number;
+    cooldown: number;
+    min_unit_diff: number;
+    sensor: Sensor
 }
 
 // Current sensor data interface
@@ -104,14 +116,14 @@ export interface PaginatedResponse<T> {
     };
 }
 
-export interface Locales {
+// Locale resource interface
+export interface Enum {
     value: string;
     label: string;
-    symbol: string;
+    symbol?: string;
 }
 
-// Chart configuration
-
+// Chart context interface
 export interface ChartContext {
     chart: any;
     dataIndex: number;
@@ -128,6 +140,7 @@ export interface ChartContext {
     };
 }
 
+// Chart options interface
 export interface ChartOptions {
     responsive: boolean;
     plugins: {
@@ -192,12 +205,19 @@ export interface ChartOptions {
         intersect: boolean;
     };
 }
-// ADMIN
 
+// ADMIN
 export interface StatisticData {
     total_users: number;
     admin_users: number;
     total_sensors: number;
+    total_logs: number;
     new_users_today: number;
     new_readings_today: number;
+    new_logs_today: number;
+}
+
+export interface Log {
+    message: string;
+    created_at: string;
 }

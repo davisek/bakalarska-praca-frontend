@@ -68,4 +68,22 @@
         border-radius: 0.5rem;
         overflow: hidden;
     }
+
+    .p-fileupload {
+        padding: 0.5rem;
+    }
+
+    .p-fileupload .p-button {
+        background-color: var(--primary-color);
+        color: var(--text-color);
+        border: none;
+        transition: background-color 0.2s, box-shadow 0.2s;
+    }
+
+    .p-fileupload .p-button:hover {
+        background-color: var(--primary-color-hover);
+        border: 0 0 10px var(--primary-color-hover);
+    }
+
+    --p-form-field-focus-border-color: var(--primary-color)!important;
 }
