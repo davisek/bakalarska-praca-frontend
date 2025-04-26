@@ -35,16 +35,11 @@ import './primevue-style.css';
 import App from './App.vue';
 import router from './plugins/router';
 import { createPinia } from 'pinia';
-import {createI18n} from "vue-i18n";
+import i18n from './plugins/i18n';
 import axiosInstance, { setupAuthErrorHandling } from './plugins/axios';
 import mqttClient from './plugins/mqtt';
 
 const pinia = createPinia()
-
-const i18n = createI18n({
-    defaultLocale: 'sk',
-    fallbackLocale: 'en'
-})
 
 const app = createApp(App)
     .use(pinia)

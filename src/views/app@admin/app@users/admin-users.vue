@@ -3,11 +3,13 @@ import { ref, onMounted, watch } from 'vue';
 import axiosInstance from '@/plugins/axios';
 import ALoadingScreen from '@/components/a-loading-screen.vue';
 import AErrorMessage from '@/components/a-error-message.vue';
-import { PaginatedResponse, PaginationMeta, User } from "@/types";
 import ABreadcrumb from "@/components/a-breadcrumb.vue";
-import { formatDateTime } from "@/utils/dateUtil.ts";
+import { PaginatedResponse, PaginationMeta, User } from "@/types";
+import { formatDateTime } from "@/utils/dateUtil";
 import { showSuccess, showError } from '@/utils/notificationUtil';
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const users = ref<User[]>([]);
 const errorMessage = ref<string | null>(null);
 const isLoading = ref(true);
@@ -51,7 +53,7 @@ const fetchUsers = async () => {
     };
     errorMessage.value = null;
   } catch (error) {
-    errorMessage.value = 'Failed to load users. Please try again.';
+    errorMessage.value = t('admin.users.failedToLoad');
   } finally {
     isLoading.value = false;
   }
@@ -106,9 +108,8 @@ const deleteUser = async () => {
       paginationMeta.value.current_page--;
     }
     fetchUsers();
-
   } catch (error) {
-    showError('Failed to delete user. Please try again.');
+    showError(t('admin.users.failedToDelete'));
   } finally {
     isDeleting.value = false;
     closeDeleteModal();
@@ -128,12 +129,12 @@ onMounted(() => {
     <div class="p-4 bg-gray-800/90 rounded-lg shadow-lg border border-gray-700/50 m-6">
 
       <div class="mb-4 flex flex-col sm:flex-row gap-4 justify-between items-center">
-        <h2 class="text-xl font-bold text-white">Users Management</h2>
+        <h2 class="text-xl font-bold text-white">{{ t('admin.users.title') }}</h2>
 
         <div class="card flex flex-wrap gap-4">
           <IconField v-if="!isLoading">
             <InputIcon class="pi pi-search" />
-            <InputText v-model="searchQuery" placeholder="Search" />
+            <InputText v-model="searchQuery" :placeholder="t('admin.users.searchPlaceholder')" />
           </IconField>
 
           <IconField v-else>
@@ -165,13 +166,13 @@ onMounted(() => {
             <Button @click="fetchUsers" type="button" icon="pi pi-refresh" text />
           </template>
 
-          <Column field="name" header="Name" sortable></Column>
+          <Column field="name" :header="t('admin.users.name')" sortable />
 
-          <Column field="surname" header="Surname" sortable></Column>
+          <Column field="surname" :header="t('admin.users.surname')" sortable />
 
-          <Column field="email" header="Email" sortable></Column>
+          <Column field="email" :header="t('admin.users.email')" sortable />
 
-          <Column field="email_verified_at" header="Email Verified" sortable>
+          <Column field="email_verified_at" :header="t('admin.users.emailVerified')" sortable>
             <template #body="{ data }">
               <div v-if="data.email_verified_at" class="flex items-center">
                 <i class="pi pi-check-circle text-green-500 mr-2"></i>
@@ -179,12 +180,12 @@ onMounted(() => {
               </div>
               <div v-else class="flex items-center">
                 <i class="pi pi-times-circle text-red-400 mr-2"></i>
-                <span class="text-gray-400">Not verified</span>
+                <span class="text-gray-400">{{ t('admin.users.notVerified') }}</span>
               </div>
             </template>
           </Column>
 
-          <Column field="locale.label" header="Locale">
+          <Column field="locale.label" :header="t('admin.users.locale')">
             <template #body="{ data }">
               <div class="flex items-center gap-2">
                 <img v-if="data.locale.symbol" :src="data.locale.symbol" class="w-5 h-5" alt="Locale flag" />
@@ -193,14 +194,14 @@ onMounted(() => {
             </template>
           </Column>
 
-          <Column field="is_admin" header="Admin" sortable>
+          <Column field="is_admin" :header="t('admin.users.admin')" sortable>
             <template #body="{ data }">
-              <Tag v-if="data.is_admin" severity="success" value="Admin" />
-              <Tag v-else severity="info" value="User" />
+              <Tag v-if="data.is_admin" severity="success" :value="t('admin.users.admin')" />
+              <Tag v-else severity="info" :value="t('admin.users.user')" />
             </template>
           </Column>
 
-          <Column field="created_at" header="Created At" sortable>
+          <Column field="created_at" :header="t('admin.users.createdAt')" sortable>
             <template #body="{ data }">
               {{ formatDateTime(data.created_at) }}
             </template>
@@ -210,7 +211,7 @@ onMounted(() => {
               :bodyStyle="{ textAlign: 'center' }"
           >
             <template #header>
-              <div style="width: 100%; text-align: center; font-weight: 600;">Actions</div>
+              <div style="width: 100%; text-align: center; font-weight: 600;">{{ t('admin.users.actions') }}</div>
             </template>
             <template #body="{ data }">
               <div class="flex gap-2 justify-center">
@@ -219,7 +220,7 @@ onMounted(() => {
                     severity="danger"
                     size="small"
                     rounded
-                    aria-label="Delete"
+                    :aria-label="t('admin.users.delete')"
                     v-if="!data.is_admin"
                     @click="confirmDelete(data)"
                 />
@@ -236,7 +237,7 @@ onMounted(() => {
   <Dialog
       v-model:visible="deleteModalVisible"
       :style="{ width: '450px' }"
-      header="Confirm Deletion"
+      :header="t('admin.users.confirmDeletionTitle')"
       :modal="true"
       :closable="!isDeleting"
       :closeOnEscape="!isDeleting"
@@ -244,19 +245,19 @@ onMounted(() => {
     <div class="confirmation-content">
       <i class="pi pi-exclamation-triangle mr-3 text-red-500 text-2xl"></i>
       <span v-if="selectedUser">
-        Are you sure you want to delete the user <strong>{{ selectedUser.name }} {{ selectedUser.surname }}</strong>?<br>
+        {{ t('admin.users.confirmDeletionText', { fullName: selectedUser.name + ' ' + selectedUser.surname }) }}
       </span>
     </div>
     <template #footer>
       <Button
-          label="No"
+          :label="t('admin.users.no')"
           icon="pi pi-times"
           @click="closeDeleteModal"
           class="p-button-text"
           :disabled="isDeleting"
       />
       <Button
-          label="Yes"
+          :label="t('admin.users.yesDelete')"
           icon="pi pi-check"
           @click="deleteUser"
           severity="danger"

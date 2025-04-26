@@ -3,7 +3,10 @@ import { ref, onMounted, watch, computed } from 'vue';
 import axiosInstance from '@/plugins/axios';
 import { showSuccess, showError } from '@/utils/notificationUtil';
 import ANotification from "@/components/a-notification.vue";
-import {NotificationSetting} from "@/types";
+import { NotificationSetting } from "@/types";
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const props = defineProps({
   isOpen: {
@@ -30,7 +33,7 @@ const fetchNotificationSettings = async () => {
     allEnabled.value = areAllNotificationsEnabled.value;
     loading.value = false;
   } catch (error) {
-    showError('Failed to load notification settings');
+    showError(t('notifications.loadError'));
     loading.value = false;
   }
 };
@@ -56,7 +59,7 @@ const saveNotificationSettings = async () => {
     savingNotifications.value = false;
   } catch (error) {
     const firstError = Object.values(error.response.data.errors)[0];
-    showError(Array.isArray(firstError) ? firstError[0] : 'Validation error');
+    showError(Array.isArray(firstError) ? firstError[0] : t('notifications.validationError'));
   } finally {
     savingNotifications.value = false;
   }
@@ -89,19 +92,19 @@ onMounted(() => {
 
     <div v-else>
       <div class="mb-6">
-        <h3 class="text-xl font-semibold text-purple-300 mb-2">Email Notifications</h3>
-        <p class="text-gray-300">Choose which sensors you want to receive email notifications for.</p>
+        <h3 class="text-xl font-semibold text-purple-300 mb-2">{{ t('notifications.title') }}</h3>
+        <p class="text-gray-300">{{ t('notifications.description') }}</p>
       </div>
 
       <div class="card flex justify-end mb-4">
         <ToggleButton
             v-model="allEnabled"
-            onLabel="Enabled"
-            offLabel="Disabled"
+            :onLabel="t('notifications.enabled')"
+            :offLabel="t('notifications.disabled')"
             onIcon="pi pi-check"
             offIcon="pi pi-times"
             class="w-auto"
-            aria-label="Toggle All Notifications"
+            :aria-label="t('notifications.toggleAll')"
         />
       </div>
 
@@ -127,6 +130,7 @@ onMounted(() => {
             <div>
               <div class="font-medium">{{ setting.sensor.display_name }}</div>
               <div class="text-sm text-gray-400">{{ setting.sensor.group_name }}</div>
+              <div class="text-sm text-gray-400">{{ t('notifications.binary') }}: {{ setting.sensor.is_output_binary ? 1 : 0 }}</div>
             </div>
           </div>
 
@@ -139,16 +143,16 @@ onMounted(() => {
               </ToggleSwitch>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div class="w-32" v-if="!setting.sensor.is_output_binary">
-                <label class="text-sm text-gray-300 block mb-1">Threshold (%)</label>
+            <div class="gap-4">
+              <div class="" v-if="!setting.sensor.is_output_binary">
+                <label class="text-sm text-gray-300 block mb-1">{{ t('notifications.threshold') }}</label>
                 <InputNumber
                     v-model="setting.threshold"
                     :disabled="!setting.email_notification_allowed"
-                    class="w-full p-1 rounded bg-gray-700 text-white"
+                    class="p-1 rounded bg-gray-700 text-white"
                     variant="outlined"
                     showButtons
-                    buttonLayout="vertical"
+                    buttonLayout="horizontal"
                     suffix=" %"
                     :max-fraction-digits="2"
                     :min="1"
@@ -163,10 +167,10 @@ onMounted(() => {
                   </template>
                 </InputNumber>
               </div>
-              <div v-else class="hidden sm:block w-32"></div>
+              <div v-else class="hidden sm:block"></div>
 
-              <div class="w-32" v-if="!setting.sensor.is_output_binary">
-                <label class="text-sm text-gray-300 block mb-1">Min Unit Diff</label>
+              <div class="" v-if="!setting.sensor.is_output_binary">
+                <label class="text-sm text-gray-300 block mb-1">{{ t('notifications.minUnitDiff') }}</label>
                 <InputNumber
                     v-model="setting.min_unit_diff"
                     :disabled="!setting.email_notification_allowed"
@@ -174,7 +178,7 @@ onMounted(() => {
                     class="w-full p-1 rounded bg-gray-700 text-white"
                     variant="outlined"
                     showButtons
-                    buttonLayout="vertical"
+                    buttonLayout="horizontal"
                     :suffix="' ' + setting.sensor.unit_of_measurement"
                     :max-fraction-digits="2"
                     :max="99.99"
@@ -190,8 +194,8 @@ onMounted(() => {
               </div>
               <div v-else class="hidden sm:block w-32"></div>
 
-              <div class="w-32">
-                <label class="text-sm text-gray-300 block mb-1">Cooldown</label>
+              <div class="">
+                <label class="text-sm text-gray-300 block mb-1">{{ t('notifications.cooldown') }}</label>
                 <InputNumber
                     v-model="setting.cooldown"
                     :disabled="!setting.email_notification_allowed"
@@ -199,7 +203,7 @@ onMounted(() => {
                     class="w-full p-1 rounded bg-gray-700 text-white"
                     variant="outlined"
                     showButtons
-                    buttonLayout="vertical"
+                    buttonLayout="horizontal"
                     suffix=" h"
                     :min="1"
                     :step="1"
@@ -220,7 +224,7 @@ onMounted(() => {
 
       <div class="flex justify-end">
         <Button
-            :label="!savingNotifications ? 'Save changes' : 'Saving...'"
+            :label="!savingNotifications ? t('notifications.saveChanges') : t('notifications.saving')"
             severity="help"
             variant="outlined"
             icon="pi pi-check"

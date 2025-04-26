@@ -1,27 +1,27 @@
 <script setup lang="ts">
 import ANavbar from "@/components/a-navbar.vue";
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import ANotification from "@/components/a-notification.vue";
 import AHamburgerMenu from "@/components/a-hamburger-menu.vue";
 import { useAuthStore } from "@/utils/authStore.ts";
 import ASettingsModal from "@/views/app@settings/a-settings-modal.vue";
-import { useRoute } from 'vue-router';
+import { useRoute } from "vue-router";
 
 const route = useRoute();
 const isMobileMenuOpen = ref(false);
 const isSettingsModalOpen = ref(false);
-const activeSettingsTab = ref('notifications');
+const activeSettingsTab = ref("notifications");
 const authStore = useAuthStore();
 
 const isAdminRoute = computed(() => {
-  return route.path.startsWith('/admin');
+  return route.path.startsWith("/admin");
 });
 
 const toggleMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value;
 };
 
-const openSettingsModal = (tab = 'notifications') => {
+const openSettingsModal = (tab = "notifications") => {
   activeSettingsTab.value = tab;
   isSettingsModalOpen.value = true;
 };
@@ -34,61 +34,115 @@ const closeMobileMenu = () => {
   isMobileMenuOpen.value = false;
 };
 
-if (typeof window !== 'undefined') {
-  window.openSettings = (tab = 'notifications') => {
+if (typeof window !== "undefined") {
+  window.openSettings = (tab = "notifications") => {
     openSettingsModal(tab);
   };
 }
 
-const openProfileSettings = () => openSettingsModal('profile');
-const openNotificationSettings = () => openSettingsModal('notifications');
+const openProfileSettings = () => openSettingsModal("profile");
+const openNotificationSettings = () => openSettingsModal("notifications");
+
+const initializeTheme = () => {
+  let isDarkMode = true;
+
+  if (authStore.isAuthenticated && authStore.user) {
+    isDarkMode = authStore.user.dark_mode;
+  } else {
+    const savedTheme = localStorage.getItem('preferred_theme');
+    if (savedTheme) {
+      isDarkMode = savedTheme === 'dark';
+    }
+  }
+
+  const htmlElement = document.documentElement;
+  if (isDarkMode) {
+    htmlElement.classList.add('dark-theme');
+    htmlElement.classList.remove('light-theme');
+  } else {
+    htmlElement.classList.add('light-theme');
+    htmlElement.classList.remove('dark-theme');
+  }
+};
+
+onMounted(() => {
+  initializeTheme();
+});
 </script>
 
 <template>
   <router-view v-if="isAdminRoute" />
 
   <div v-else class="flex min-h-screen">
-    <div class="hidden lg:block sticky top-0 h-screen w-1/6 bg-gray-800 text-gray-300">
+    <div
+      class="hidden lg:block sticky top-0 h-screen w-1/6 bg-gray-800 text-gray-300"
+    >
       <ANavbar
-          @open-profile="openProfileSettings"
-          @open-settings="openNotificationSettings"
+        @open-profile="openProfileSettings"
+        @open-settings="openNotificationSettings"
       />
     </div>
 
-    <div class="lg:hidden fixed z-50 bg-gray-800 text-gray-300 w-full p-4 flex justify-between items-center border-b-cyan-300 border-b">
+    <div
+      class="lg:hidden fixed z-50 bg-gray-800 text-gray-300 w-full p-4 flex justify-between items-center border-b-cyan-300 border-b"
+    >
       <div class="logo-container">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="logo-icon">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 0 0 2.25-2.25V6.75a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 6.75v10.5a2.25 2.25 0 0 0 2.25 2.25Zm.75-12h9v9h-9v-9Z" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="logo-icon"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 0 0 2.25-2.25V6.75a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 6.75v10.5a2.25 2.25 0 0 0 2.25 2.25Zm.75-12h9v9h-9v-9Z"
+          />
         </svg>
         <h1 class="logo-text">SensorDataApp</h1>
       </div>
 
       <button @click="toggleMenu" class="menu-button">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="menu-icon">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="menu-icon"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+          />
         </svg>
       </button>
     </div>
 
     <AHamburgerMenu
-        :is-open="isMobileMenuOpen"
-        @close="closeMobileMenu"
-        @open-profile="openProfileSettings"
-        @open-settings="openNotificationSettings"
+      :is-open="isMobileMenuOpen"
+      @close="closeMobileMenu"
+      @open-profile="openProfileSettings"
+      @open-settings="openNotificationSettings"
     />
 
     <ANotification position="top-right" />
 
-    <div class="lg:w-5/6 w-full lg:p-10 p-4 lg:pt-10 pt-24 min-h-100 gradient-background text-gray-100 bg-cover">
+    <div
+      class="lg:w-5/6 w-full lg:p-10 p-4 lg:pt-10 pt-24 min-h-100 gradient-background text-gray-100 bg-cover"
+    >
       <router-view />
     </div>
   </div>
 
   <ASettingsModal
-      v-if="!isAdminRoute"
-      :is-open="isSettingsModalOpen"
-      :initial-tab="activeSettingsTab"
-      @close="closeSettingsModal"
+    v-if="!isAdminRoute"
+    :is-open="isSettingsModalOpen"
+    :initial-tab="activeSettingsTab"
+    @close="closeSettingsModal"
   />
 </template>
 

@@ -5,8 +5,9 @@ import mqttClient from '@/plugins/mqtt';
 import {formatDateTime} from "@/utils/dateUtil.ts";
 import {Sensor, CurrentSensorData, MqttSensorPayload} from '@/types';
 import ALoadingScreen from "@/components/a-loading-screen.vue";
-import AErrorMessage from "@/components/a-error-message.vue";
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const props = defineProps({
   sensor: {
     type: Object as () => Sensor,
@@ -32,7 +33,7 @@ const fetchSensorData = async () => {
     sensorData.created_at = response.created_at;
     errorMessage.value = null;
   } catch (err) {
-    errorMessage.value = `Failed to load ${props.sensor.type} data.`;
+    errorMessage.value = t('sensor.failedToLoadData', { type: props.sensor.type });
   } finally {
     isLoading.value = false;
   }
@@ -48,7 +49,6 @@ const handleMQTTMessage = (topic: string, message: Buffer) => {
 
 const subscribeToMQTTTopics = () => {
   mqttClient.subscribe(`${props.sensor.type}-data`, (err) => {
-    if (!err) console.log('Subscribed to sensor');
     errorMessage.value = null;
   });
 
@@ -81,10 +81,10 @@ onUnmounted(() => {
 
     <div class="lg:flex flex-none justify-center lg:ml-2 ml-0">
       <div class="w-full lg:w-5/6">
-        <h3 class=" text-md font-bold mb-2 text-gray-500">{{ props.sensor.display_name }} Data</h3>
+        <h3 class="text-md font-bold mb-2 text-gray-500">{{ t('sensor.liveDataTitle', { name: props.sensor.display_name }) }}</h3>
         <p class="value-number text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300 shadow-sm"><span class="font-bold">{{ sensorData.value }} {{ sensorData.symbol }}</span></p>
-        <p class="text-md"><span>Recorded at:</span> <span class="font-bold" v-if="sensorData.created_at">{{ formatDateTime(sensorData.created_at) }}</span>
-          <span v-else>No data available</span>
+        <p class="text-md">  <span>{{ t('sensor.recordedAt') }}:</span> <span class="font-bold" v-if="sensorData.created_at">{{ formatDateTime(sensorData.created_at) }}</span>
+          <span v-else>{{ t('common.noDataFound') }}</span>
         </p>
       </div>
       <div class="w-full lg:w-1/6 justify-center mt-2">

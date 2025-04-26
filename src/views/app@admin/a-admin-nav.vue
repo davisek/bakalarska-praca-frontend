@@ -2,7 +2,9 @@
 import { ref, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/utils/authStore';
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
@@ -13,18 +15,18 @@ const isActive = (path: string) => {
 
 const navItems = [
   {
-    label: 'Dashboard',
+    label: t('admin.nav.dashboard'),
     icon: 'pi pi-home',
     route: '/admin',
     exact: true
   },
   {
-    label: 'Users Management',
+    label: t('admin.nav.usersManagement'),
     icon: 'pi pi-users',
     route: '/admin/users'
   },
   {
-    label: 'Sensors Management',
+    label: t('admin.nav.sensorsManagement'),
     icon: 'pi pi-tablet',
     route: '/admin/sensors'
   },
@@ -40,6 +42,7 @@ const currentUser = computed(() => {
 });
 </script>
 
+
 <template>
   <div class="admin-navbar h-full flex flex-col">
     <div class="border-b border-gray-700 p-6">
@@ -48,8 +51,8 @@ const currentUser = computed(() => {
           <i class="pi pi-shield text-white text-xl"></i>
         </div>
         <div>
-          <h1 class="text-xl font-bold text-white">Admin Panel</h1>
-          <p class="text-sm text-gray-400">Sensor Data Management</p>
+          <h1 class="text-xl font-bold text-white">{{ t('admin.nav.adminPanel') }}</h1>
+          <p class="text-sm text-gray-400">{{ t('admin.nav.sensorDataManagement') }}</p>
         </div>
       </div>
 
@@ -59,7 +62,7 @@ const currentUser = computed(() => {
         </div>
         <div class="flex-1 overflow-hidden">
           <p class="text-white font-medium truncate">{{ currentUser?.name }} {{ currentUser?.surname }}</p>
-          <p class="text-xs text-gray-400">Administrator</p>
+          <p class="text-xs text-gray-400">{{ t('admin.nav.administrator') }}</p>
         </div>
       </div>
     </div>
@@ -88,11 +91,12 @@ const currentUser = computed(() => {
           class="w-full py-2 px-4 bg-gray-700 hover:bg-gray-600 rounded-lg flex items-center justify-center text-gray-300 transition-colors"
       >
         <i class="pi pi-arrow-left mr-2"></i>
-        <span>Back to App</span>
+        <span>{{ t('admin.nav.backToApp') }}</span>
       </button>
     </div>
   </div>
 </template>
+
 
 <style scoped>
 .nav-item:hover {

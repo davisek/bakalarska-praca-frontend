@@ -6,6 +6,9 @@ import ANotification from "@/components/a-notification.vue";
 import ALoadingScreen from "@/components/a-loading-screen.vue";
 import {Enum, User} from "@/types";
 import {formatDateTime} from "@/utils/dateUtil.ts";
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const props = defineProps({
   isOpen: {
@@ -55,7 +58,7 @@ const fetchUserProfile = async () => {
 
     isLoading.value = false;
   } catch (error) {
-    showError('Failed to load user profile');
+    showError(t('profile.loadError'));
     isLoading.value = false;
   }
 };
@@ -69,7 +72,7 @@ const saveProfileInfo = async () => {
     if (profileForm.value.name) formProfileData.name = profileForm.value.name;
     if (profileForm.value.surname) formProfileData.surname = profileForm.value.surname;
     if (profileForm.value.email) formProfileData.email = profileForm.value.email;
-    if (profileForm.value.locale) formProfileData.locale = profileForm.value.locale;
+    formProfileData.locale = profileForm.value.locale;
     formProfileData.dark_mode = profileForm.value.dark_mode;
 
     const response = await axiosInstance.put('/user', formProfileData);
@@ -78,7 +81,7 @@ const saveProfileInfo = async () => {
     await fetchUserProfile();
   } catch (error) {
     const firstError = Object.values(error.response.data.errors)[0];
-    showError(Array.isArray(firstError) ? firstError[0] : 'Validation error');
+    showError(Array.isArray(firstError) ? firstError[0] : t('profile.validationError'));
   } finally {
     savingProfile.value = false;
   }
@@ -87,17 +90,17 @@ const saveProfileInfo = async () => {
 const changePassword = async () => {
   try {
     if (!passwordForm.value.current_password) {
-      showError('Current password is required');
+      showError(t('profile.currentPasswordRequired'));
       return;
     }
 
     if (!passwordForm.value.password) {
-      showError('New password is required');
+      showError(t('profile.newPasswordRequired'));
       return;
     }
 
     if (passwordForm.value.password !== passwordForm.value.password_confirmation) {
-      showError('Password confirmation does not match');
+      showError(t('profile.passwordMismatch'));
       return;
     }
 
@@ -122,7 +125,7 @@ const changePassword = async () => {
   } catch (error) {
     if (error.response && error.response.data && error.response.data.errors) {
       const firstError = Object.values(error.response.data.errors)[0];
-      showError(Array.isArray(firstError) ? firstError[0] : 'Validation error');
+      showError(Array.isArray(firstError) ? firstError[0] : t('profile.validationError'));
     }
   } finally {
     changingPassword.value = false;
@@ -135,7 +138,7 @@ const getLocale = async () => {
     const response = await axiosInstance.get(`/auth/locale`);
     locales.value = response.locales;
   } catch (error) {
-    showError('Unknown error.');
+    showError(t('profile.unknownError'));
   } finally {
     isLoading.value = false;
   }
@@ -152,7 +155,7 @@ const closeVerificationModal = () => {
 
 const submitVerificationCode = async () => {
   if (!verificationCode.value || verificationCode.value.length !== 5) {
-    showError('Please enter a valid 5-digit verification code');
+    showError(t('profile.verificationCodeInvalid'));
     return;
   }
 
@@ -180,12 +183,12 @@ const submitVerificationCode = async () => {
 
         const firstErrorField = Object.keys(errors)[0];
         const firstError = errors[firstErrorField];
-        showError(Array.isArray(firstError) ? firstError[0] : 'Validation error');
+        showError(Array.isArray(firstError) ? firstError[0] : t('profile.validationError'));
       } else {
-        showError('Failed to verify email. Please try again.');
+        showError(t('profile.verificationFailed'));
       }
     } else {
-      showError('Unable to connect to the server. Please try again later.');
+      showError(t('profile.connectionError'));
     }
   } finally {
     sendingVerification.value = false;
@@ -206,7 +209,7 @@ const resendVerificationCode = async () => {
     if (error.response && error.response.data) {
       showError(error.response.data.message);
     } else {
-      showError('Failed to resend verification code. Please try again later.');
+      showError(t('profile.resendFailed'));
     }
   } finally {
     resendingCode.value = false;
@@ -235,14 +238,14 @@ onMounted(() => {
 
     <div>
       <div class="mb-6">
-        <h3 class="text-xl font-semibold text-purple-300 mb-2">Profile Information</h3>
-        <p class="text-gray-300">Update your account information.</p>
+        <h3 class="text-xl font-semibold text-purple-300 mb-2">{{ t('profile.title') }}</h3>
+        <p class="text-gray-300">{{ t('profile.description') }}</p>
       </div>
 
       <div class="space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="space-y-2">
-            <label class="text-sm text-gray-300">First Name</label>
+            <label class="text-sm text-gray-300">{{ t('profile.firstName') }}</label>
             <InputText
                 v-model="profileForm.name"
                 class="w-full"
@@ -251,7 +254,7 @@ onMounted(() => {
           </div>
 
           <div class="space-y-2">
-            <label class="text-sm text-gray-300">Last Name</label>
+            <label class="text-sm text-gray-300">{{ t('profile.lastName') }}</label>
             <InputText
                 v-model="profileForm.surname"
                 class="w-full"
@@ -261,7 +264,7 @@ onMounted(() => {
         </div>
 
         <div class="space-y-2">
-          <label class="text-sm text-gray-300">Email Address</label>
+          <label class="text-sm text-gray-300">{{ t('profile.emailAddress') }}</label>
           <InputText
               v-model="profileForm.email"
               type="email"
@@ -272,60 +275,23 @@ onMounted(() => {
 
         <div class="grid grid-cols-1 md:grid-cols-3">
           <div class="space-y-2">
-            <label class="block font-medium text-gray-300">Language</label>
-            <SelectButton
-                v-model="profileForm.locale"
-                :options="locales"
-                optionLabel="label"
-                optionValue="value"
-                :disabled="!locales"
-            >
-              <template #option="locale">
-                <div class="flex items-center">
-                  <img
-                      v-if="locale.option.symbol"
-                      :src="locale.option.symbol"
-                      :alt="locale.option.label"
-                      class="w-5 h-5 mr-2"
-                  />
-                  <span>{{ locale.option.label }}</span>
-                </div>
-              </template>
-            </SelectButton>
-          </div>
-
-          <div class="space-y-2">
-            <label class="block font-medium text-gray-300">Website theme</label>
-            <ToggleButton
-                :modelValue="!Boolean(profileForm.dark_mode)"
-                @update:modelValue="profileForm.dark_mode = !$event"
-                onLabel="Light"
-                offLabel="Dark"
-                onIcon="pi pi-sun"
-                offIcon="pi pi-moon"
-                class="p-button-sm"
-                aria-label="Toggle theme"
-            />
-          </div>
-
-          <div class="space-y-2">
-            <label class="font-medium text-gray-300">Email Verification</label>
+            <label class="font-medium text-gray-300">{{ t('profile.emailVerification') }}</label>
             <div v-if="profileForm.email_verified_at" class="flex items-center p-3 bg-green-900/20 rounded-md border border-green-600/30">
               <i class="pi pi-check-circle text-green-400 mr-2 text-xl"></i>
               <div>
-                <div class="text-green-400 font-medium">Verified</div>
+                <div class="text-green-400 font-medium">{{ t('profile.verified') }}</div>
                 <div class="text-xs text-green-300/70">{{ formatDateTime(profileForm.email_verified_at) }}</div>
               </div>
             </div>
             <div v-else class="flex items-center p-3 bg-yellow-900/20 rounded-md border border-yellow-600/30">
               <i class="pi pi-exclamation-triangle text-yellow-400 mr-2 text-xl"></i>
-              <div  class="text-yellow-400 font-medium">
-                Not Verified
+              <div class="text-yellow-400 font-medium">
+                {{ t('profile.notVerified') }}
               </div>
             </div>
             <Button
                 v-if="!profileForm.email_verified_at"
-                label="Verify Now"
+                :label="t('profile.verifyNow')"
                 severity="warning"
                 text
                 size="small"
@@ -338,7 +304,7 @@ onMounted(() => {
           <Button
               @click="saveProfileInfo"
               :isLoading="savingProfile"
-              label="Save Profile Changes"
+              :label="t('profile.saveChanges')"
               severity="help"
               icon="pi pi-user-edit"
               iconPos="right"
@@ -348,12 +314,12 @@ onMounted(() => {
       </div>
 
       <div class="pt-10 mt-8 border-t border-gray-700">
-        <h3 class="text-xl font-semibold text-purple-300 mb-2">Change Password</h3>
-        <p class="text-gray-300">Update your password to maintain security.</p>
+        <h3 class="text-xl font-semibold text-purple-300 mb-2">{{ t('profile.passwordSection') }}</h3>
+        <p class="text-gray-300">{{ t('profile.passwordDescription') }}</p>
 
         <div class="space-y-4 mt-6">
           <div class="space-y-2">
-            <label class="block text-sm font-medium text-gray-300">Current Password</label>
+            <label class="block text-sm font-medium text-gray-300">{{ t('profile.currentPassword') }}</label>
             <Password
                 v-model="passwordForm.current_password"
                 class="w-full"
@@ -366,7 +332,7 @@ onMounted(() => {
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="space-y-2">
-              <label class="block text-sm font-medium text-gray-300">New Password</label>
+              <label class="block text-sm font-medium text-gray-300">{{ t('profile.newPassword') }}</label>
               <Password
                   v-model="passwordForm.password"
                   :disabled="!passwordForm.current_password"
@@ -378,7 +344,7 @@ onMounted(() => {
             </div>
 
             <div class="space-y-2">
-              <label class="block text-sm font-medium text-gray-300">Confirm New Password</label>
+              <label class="block text-sm font-medium text-gray-300">{{ t('profile.confirmPassword') }}</label>
               <Password
                   v-model="passwordForm.password_confirmation"
                   :disabled="!passwordForm.current_password"
@@ -396,7 +362,7 @@ onMounted(() => {
                 @click="changePassword"
                 :disabled="changingPassword || !passwordForm.current_password || !passwordForm.password || !passwordForm.password_confirmation"
                 :isLoading="changingPassword"
-                label="Change Password"
+                :label="t('profile.changePassword')"
                 severity="secondary"
                 icon="pi pi-check"
                 iconPos="right"
@@ -410,21 +376,21 @@ onMounted(() => {
 
     <Dialog
         v-model:visible="isVerificationModalOpen"
-        header="Verify Your Email"
+        :header="t('profile.verifyEmail')"
         :modal="true"
         :closable="true"
         :closeOnEscape="true"
     >
       <div class="p-4">
-        <p class="mb-4 text-gray-200">Enter the 5-digit verification code sent to your email address.</p>
+        <p class="mb-4 text-gray-200">{{ t('profile.verificationCodePrompt') }}</p>
 
         <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-300 mb-2">Verification Code</label>
+          <label class="block text-sm font-medium text-gray-300 mb-2">{{ t('profile.verificationCode') }}</label>
           <InputText
               v-model="verificationCode"
               class="w-full"
               maxlength="5"
-              placeholder="Enter 5-digit code"
+              :placeholder="t('profile.verificationCodePlaceholder')"
           />
         </div>
 
@@ -432,7 +398,7 @@ onMounted(() => {
           <Button
               @click="resendVerificationCode"
               :loading="resendingCode"
-              label="Resend Code"
+              :label="t('profile.resendCode')"
               severity="secondary"
               text
               icon="pi pi-refresh"
@@ -441,7 +407,7 @@ onMounted(() => {
           <Button
               @click="submitVerificationCode"
               :loading="sendingVerification"
-              label="Verify"
+              :label="t('profile.verify')"
               severity="success"
               icon="pi pi-check"
           />

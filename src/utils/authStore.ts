@@ -3,8 +3,10 @@ import { ref, watch } from 'vue';
 import axiosInstance from '@/plugins/axios';
 import { showSuccess, showError } from '@/utils/notificationUtil';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
 export const useAuthStore = defineStore('auth', () => {
+    const { t } = useI18n();
     const router = useRouter();
     const isAuthenticated = ref(false);
     const user = ref(null);
@@ -19,7 +21,7 @@ export const useAuthStore = defineStore('auth', () => {
             try {
                 user.value = JSON.parse(userData);
             } catch (e) {
-                console.error('Error parsing user data:', e);
+                // console.error('Error parsing user data:', e);
                 user.value = null;
             }
         }
@@ -36,10 +38,10 @@ export const useAuthStore = defineStore('auth', () => {
                 isAuthenticated.value = true;
                 user.value = response.user;
 
-                showSuccess(response.message || 'Login successful');
+                showSuccess(response.message || t('auth.loginSuccessful'));
                 return true;
             } else {
-                showError(response.message || 'Login failed');
+                showError(response.message || t('auth.loginFailed'));
                 return false;
             }
         } catch (err) {
@@ -48,17 +50,17 @@ export const useAuthStore = defineStore('auth', () => {
 
                 if (errorData.errors) {
                     const firstError = Object.values(errorData.errors)[0];
-                    showError(Array.isArray(firstError) ? firstError[0] : 'Validation error');
+                    showError(Array.isArray(firstError) ? firstError[0] : t('auth.validationError'));
 
                     return {
                         success: false,
                         errors: errorData.errors
                     };
                 } else {
-                    showError('Login failed. Please check your credentials and try again.');
+                    showError(t('auth.loginFailed'));
                 }
             } else {
-                showError('An unexpected error occurred. Please try again.');
+                showError(t('auth.unexpectedError'));
             }
             return false;
         } finally {
@@ -72,14 +74,14 @@ export const useAuthStore = defineStore('auth', () => {
         try {
             response = await axiosInstance.post('/auth/logout');
         } catch (err) {
-            showError('Logout unsuccessful');
+            showError(t('auth.logoutUnsuccessful'));
         } finally {
             localStorage.removeItem('auth_token');
             localStorage.removeItem('user');
             isAuthenticated.value = false;
             user.value = null;
             loading.value = false;
-            showSuccess(response.message);
+            showSuccess(response.message || t('auth.logoutSuccessful'));
         }
     };
 

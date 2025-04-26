@@ -6,6 +6,9 @@ import {RouterLink, useRoute} from "vue-router";
 import { SensorGroup } from '@/types';
 import ALoadingScreen from "@/components/a-loading-screen.vue";
 import AErrorMessage from "@/components/a-error-message.vue";
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const groupsWithSensors = ref<SensorGroup[]>([]);
 const errorMessage = ref<string | null>(null);
@@ -17,8 +20,7 @@ const fetchSensorData = async () => {
     const response = await axiosInstance.get<SensorGroup[]>('/sensor-groups');
     groupsWithSensors.value = response;
   } catch (err) {
-    errorMessage.value = 'Failed to load data. Please try again.';
-    console.error(err);
+    errorMessage.value = t('groups.loadError');
   } finally {
     isLoading.value = false;
   }
@@ -43,7 +45,7 @@ const totalSensors = computed(() => {
 
     <div class="sensor-groups bg-gray-800/80 p-6 shadow-lg mb-8">
       <h1 class="text-2xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300">
-        Sensor Groups
+        {{ t('groups.title') }}
       </h1>
       <div class="flex flex-wrap gap-6">
         <div class="bg-gray-900/60 rounded-lg p-4 shadow-md border border-gray-800 flex items-center">
@@ -53,7 +55,7 @@ const totalSensors = computed(() => {
             </svg>
           </div>
           <div>
-            <p class="text-gray-400 text-sm">Sensor Groups</p>
+            <p class="text-gray-400 text-sm">{{ t('groups.sensorGroups') }}</p>
             <p class="text-xl font-bold">{{ groupsWithSensors.length }}</p>
           </div>
         </div>
@@ -64,7 +66,7 @@ const totalSensors = computed(() => {
             </svg>
           </div>
           <div>
-            <p class="text-gray-400 text-sm">Total Sensors</p>
+            <p class="text-gray-400 text-sm">{{ t('groups.totalSensors') }}</p>
             <p class="text-xl font-bold">{{ totalSensors }}</p>
           </div>
         </div>

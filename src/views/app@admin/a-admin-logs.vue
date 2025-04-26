@@ -5,8 +5,9 @@ import ALoadingScreen from '@/components/a-loading-screen.vue';
 import AErrorMessage from '@/components/a-error-message.vue';
 import {PaginatedResponse, PaginationMeta, Log, User} from "@/types";
 import { formatDateTime } from "@/utils/dateUtil.ts";
+import { useI18n } from 'vue-i18n';
 
-
+const { t } = useI18n();
 const logs = ref<Log[]>([])
 const errorMessage = ref<string | null>(null);
 const isLoading = ref(true);
@@ -46,7 +47,7 @@ const fetchLogs = async () => {
     };
     errorMessage.value = null;
   } catch (error) {
-    errorMessage.value = 'Failed to load logs. Please try again.';
+    errorMessage.value = t('admin.logs.loadError');
   } finally {
     isLoading.value = false;
   }
@@ -87,12 +88,12 @@ onMounted(() => {
   <div class="p-4 bg-gray-800/90 rounded-lg shadow-lg border border-gray-700/50 m-6">
 
     <div class="mb-4 flex flex-col sm:flex-row gap-4 justify-between items-center">
-      <h2 class="text-xl font-bold text-white">Logs</h2>
+      <h2 class="text-xl font-bold text-white">{{ t('admin.logs.title') }}</h2>
 
       <div class="card flex flex-wrap gap-4">
         <IconField v-if="!isLoading">
           <InputIcon class="pi pi-search" />
-          <InputText v-model="searchQuery" placeholder="Search" />
+          <InputText v-model="searchQuery" :placeholder="t('admin.logs.search')" />
         </IconField>
 
         <IconField v-else>
@@ -126,13 +127,13 @@ onMounted(() => {
 
         <Column
             field="message"
-            header="Message"
+            :header="t('admin.logs.message')"
             :headerStyle="{ width: '70%' }"
         ></Column>
 
         <Column
             field="created_at"
-            header="Created at"
+            :header="t('admin.logs.createdAt')"
             sortable
             :headerStyle="{ width: '30%' }"
         >

@@ -6,14 +6,18 @@ import ABreadcrumb from '@/components/a-breadcrumb.vue';
 import {StatisticData} from "@/types";
 import ALoadingScreen from "@/components/a-loading-screen.vue";
 import AAdminLogs from "@/views/app@admin/a-admin-logs.vue";
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const router = useRouter();
 const stats = ref<StatisticData>({
   total_users: 0,
   admin_users: 0,
   total_sensors: 0,
   new_users_today: 0,
-  new_readings_today: 0
+  new_readings_today: 0,
+  total_logs: 0,
+  new_logs_today: 0,
 });
 
 const isLoading = ref(true);
@@ -24,7 +28,6 @@ const fetchAdminStats = async () => {
     const response = await axiosInstance.get('admin/statistics');
     stats.value = response;
   } catch (error) {
-    console.error('Failed to load admin stats:', error);
   } finally {
     isLoading.value = false;
   }
@@ -39,6 +42,7 @@ onMounted(() => {
 });
 </script>
 
+
 <template>
   <div class="lg:p-6 p-2">
     <ABreadcrumb />
@@ -46,7 +50,7 @@ onMounted(() => {
 
     <div class="p-6">
       <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300 mb-6">
-        Admin Dashboard
+        {{ t('admin.dashboard.title') }}
       </h1>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -55,10 +59,10 @@ onMounted(() => {
             <i class="pi pi-users text-2xl"></i>
           </div>
           <div>
-            <h3 class="stat-label">Total Users</h3>
+            <h3 class="stat-label">{{ t('admin.dashboard.totalUsers') }}</h3>
             <div class="stat-value">{{ stats.total_users }}</div>
             <div class="stat-info">
-              <span class="text-green-400">+{{ stats.new_users_today }}</span> new today
+              <span class="text-green-400">+{{ stats.new_users_today }}</span> {{ t('admin.dashboard.newToday') }}
             </div>
           </div>
         </div>
@@ -68,10 +72,10 @@ onMounted(() => {
             <i class="pi pi-shield text-2xl"></i>
           </div>
           <div>
-            <h3 class="stat-label">Admin Users</h3>
+            <h3 class="stat-label">{{ t('admin.dashboard.adminUsers') }}</h3>
             <div class="stat-value">{{ stats.admin_users }}</div>
             <div class="stat-info">
-              <span class="text-gray-400">{{ ((stats.admin_users / stats.total_users) * 100).toFixed(1) }}%</span> of total users
+              <span class="text-gray-400">{{ ((stats.admin_users / stats.total_users) * 100).toFixed(1) }}%</span> {{ t('admin.dashboard.ofTotal') }}
             </div>
           </div>
         </div>
@@ -81,10 +85,10 @@ onMounted(() => {
             <i class="pi pi-microchip text-2xl"></i>
           </div>
           <div>
-            <h3 class="stat-label">Total Sensors</h3>
+            <h3 class="stat-label">{{ t('admin.dashboard.totalSensors') }}</h3>
             <div class="stat-value">{{ stats.total_sensors }}</div>
             <div class="stat-info">
-              <span class="text-emerald-400">{{ stats.new_readings_today }}</span> new readings today
+              <span class="text-emerald-400">{{ stats.new_readings_today }}</span> {{ t('admin.dashboard.newReadingsToday') }}
             </div>
           </div>
         </div>
@@ -94,19 +98,19 @@ onMounted(() => {
             <i class="pi pi-receipt text-2xl"></i>
           </div>
           <div>
-            <h3 class="stat-label">Total Logs</h3>
+            <h3 class="stat-label">{{ t('admin.dashboard.totalLogs') }}</h3>
             <div class="stat-value">{{ stats.total_logs }}</div>
             <div class="stat-info">
-              <span class="text-emerald-400">+{{ stats.new_logs_today }}</span> new today
+              <span class="text-emerald-400">+{{ stats.new_logs_today }}</span> {{ t('admin.dashboard.newToday') }}
             </div>
           </div>
         </div>
       </div>
 
-      <h2 class="text-xl font-bold text-gray-200 mb-4">Quick Actions</h2>
+      <h2 class="text-xl font-bold text-gray-200 mb-4">{{ t('admin.dashboard.quickActions') }}</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 mb-8">
         <Button
-            label="Manage Users"
+            :label="t('admin.dashboard.manageUsers')"
             icon="pi pi-users"
             iconPos="left"
             severity="info"
@@ -115,7 +119,7 @@ onMounted(() => {
         />
 
         <Button
-            label="Manage Sensors"
+            :label="t('admin.dashboard.manageSensors')"
             icon="pi pi-tablet"
             iconPos="left"
             severity="success"
@@ -126,7 +130,6 @@ onMounted(() => {
     </div>
 
     <AAdminLogs />
-
   </div>
 </template>
 

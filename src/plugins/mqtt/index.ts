@@ -9,11 +9,11 @@ const options = {
 const mqttClient = mqtt.connect(import.meta.env.VITE_MQTT_BROKER_URL, options);
 
 mqttClient.on('connect', () => {
-    console.log('Connected to MQTT broker');
+    // console.log('Connected to MQTT broker');
 });
 
 mqttClient.on('error', (err) => {
-    console.error('MQTT Connection error:', err);
+    // console.error('MQTT Connection error:', err);
 });
 
 export default mqttClient;

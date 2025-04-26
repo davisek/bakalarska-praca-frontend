@@ -1,6 +1,8 @@
 import axios, {AxiosError, AxiosInstance, AxiosResponse} from 'axios';
-import { PaginatedResponse } from '@/types';
 import {showError} from "@/utils/notificationUtil";
+import i18n from '@/plugins/i18n';
+
+const t = i18n.global.t;
 
 const axiosInstance: AxiosInstance = axios.create({
     baseURL: import.meta.env.VITE_APP_AXIOS_URL,
@@ -47,13 +49,13 @@ export const setupAuthErrorHandling = (router: any) => {
                     localStorage.removeItem('user');
 
                     if (router.currentRoute.value.path !== '/login') {
-                        showError('Your session has expired. Please log in again.');
+                        showError(t('auth.sessionExpired'));
                         router.push('/login');
                     }
                 }
 
                 if (status === 403) {
-                    showError('You do not have permission to access this resource.');
+                    showError(t('auth.permissionDenied'));
                 }
             }
 

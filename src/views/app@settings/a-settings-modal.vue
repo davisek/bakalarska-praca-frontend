@@ -2,6 +2,9 @@
 import { ref, watch } from 'vue';
 import AProfileSettings from './a-profile-settings.vue';
 import ANotificationSettings from './a-notification-settings.vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const props = defineProps({
   isOpen: {
@@ -16,7 +19,6 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['close']);
-
 const activeTab = ref(props.initialTab);
 
 watch(() => props.initialTab, (newTab) => {
@@ -42,7 +44,7 @@ const closeModal = () => {
       >
         <div class="border-b border-gray-700">
           <div class="flex items-center justify-between p-6">
-            <h2 class="text-2xl font-bold">Settings</h2>
+            <h2 class="text-2xl font-bold">{{ t('settings.title') }}</h2>
             <button
                 @click="closeModal"
                 class="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors"
@@ -57,24 +59,24 @@ const closeModal = () => {
             <button
                 @click="activeTab = 'profile'"
                 :class="[
-                'pb-4 px-2 font-medium transition-colors',
-                activeTab === 'profile'
-                  ? 'text-purple-400 border-b-2 border-purple-400'
-                  : 'text-gray-300 hover:text-white'
-              ]"
+                  'pb-4 px-2 font-medium transition-colors',
+                  activeTab === 'profile'
+                    ? 'text-purple-400 border-b-2 border-purple-400'
+                    : 'text-gray-300 hover:text-white'
+                ]"
             >
-              Profile
+              {{ t('profile.title') }}
             </button>
             <button
                 @click="activeTab = 'notifications'"
                 :class="[
-                'pb-4 px-2 font-medium transition-colors',
-                activeTab === 'notifications'
-                  ? 'text-purple-400 border-b-2 border-purple-400'
-                  : 'text-gray-300 hover:text-white'
-              ]"
+                  'pb-4 px-2 font-medium transition-colors',
+                  activeTab === 'notifications'
+                    ? 'text-purple-400 border-b-2 border-purple-400'
+                    : 'text-gray-300 hover:text-white'
+                ]"
             >
-              Notifications
+              {{ t('notifications.title') }}
             </button>
           </div>
         </div>

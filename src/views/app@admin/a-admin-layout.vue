@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import AAdminNavbar from './a-admin-nav.vue';
 import ANotification from '@/components/a-notification.vue';
-import { ref } from 'vue';
+import { ref, onBeforeMount } from 'vue';
+import { useI18n } from 'vue-i18n';
+import i18n from '@/plugins/i18n';
 
+const { t } = useI18n();
 const isMobileMenuOpen = ref(false);
 
 const toggleMenu = () => {
@@ -12,6 +15,13 @@ const toggleMenu = () => {
 const closeMobileMenu = () => {
   isMobileMenuOpen.value = false;
 };
+
+onBeforeMount(() => {
+  const storedLocale = localStorage.getItem('preferred_locale');
+  if (storedLocale) {
+    i18n.global.locale = storedLocale;
+  }
+});
 </script>
 
 <template>
@@ -25,7 +35,7 @@ const closeMobileMenu = () => {
         <div class="p-2 rounded-lg bg-gradient-to-br from-purple-600 to-indigo-600">
           <i class="pi pi-shield text-white"></i>
         </div>
-        <h1 class="text-xl font-bold text-white">Admin Panel</h1>
+        <h1 class="text-xl font-bold text-white">{{ t('admin.panel') }}</h1>
       </div>
 
       <button @click="toggleMenu" class="p-2 rounded-md bg-gray-700 text-gray-300 hover:bg-gray-600 transition-colors">
@@ -41,9 +51,9 @@ const closeMobileMenu = () => {
 
     <div
         :class="[
-        'fixed top-0 right-0 h-screen w-4/5 max-w-xs bg-gray-800 z-50 transform transition-transform duration-300 lg:hidden',
-        isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
-      ]"
+          'fixed top-0 right-0 h-screen w-4/5 max-w-xs bg-gray-800 z-50 transform transition-transform duration-300 lg:hidden',
+          isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+        ]"
     >
       <div class="p-4 flex justify-end">
         <button @click="closeMobileMenu" class="p-2 rounded-md bg-gray-700 text-gray-300 hover:bg-gray-600 transition-colors">

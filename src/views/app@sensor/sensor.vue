@@ -5,6 +5,9 @@ import ADataTable from "@/components/a-data-table.vue";
 import ABreadcrumb from "@/components/a-breadcrumb.vue";
 import ACurrentReading from "@/views/app@sensor/a-current-reading.vue";
 import { Sensor, TimeRangeOption } from '@/types';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const props = defineProps({
   sensor: {
@@ -14,15 +17,15 @@ const props = defineProps({
 });
 
 const timeRanges: TimeRangeOption[] = [
-  { label: "24h", value: 1 },
-  { label: "48h", value: 2 },
-  { label: "1T", value: 7 },
-  { label: "2T", value: 14 },
-  { label: "1M", value: 30 },
-  { label: "3M", value: 90 },
-  { label: "6M", value: 180 },
-  { label: "1Y", value: 365 },
-  { label: "MAX", value: "max" },
+  { label: t('time.24h'), value: 1 },
+  { label: t('time.48h'), value: 2 },
+  { label: t('time.1w'), value: 7 },
+  { label: t('time.2w'), value: 14 },
+  { label: t('time.1m'), value: 30 },
+  { label: t('time.3m'), value: 90 },
+  { label: t('time.6m'), value: 180 },
+  { label: t('time.1y'), value: 365 },
+  { label: t('time.max'), value: "max" },
 ];
 
 const selectedTimeRange = ref<number | string | null>(1);
@@ -96,7 +99,7 @@ updateTimeRange(1);
           </div>
           <div>
             <h1 class="text-2xl font-bold">{{ props.sensor.display_name }}</h1>
-            <p class="text-gray-400 text-sm">Sensor ID: {{ props.sensor.type }}</p>
+            <p class="text-gray-400 text-sm">{{ t('sensor.sensorId') }}: {{ props.sensor.type }}</p>
           </div>
         </div>
       </div>
@@ -104,18 +107,18 @@ updateTimeRange(1);
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div class="sensor-content">
-        <h2 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300 pb-2 sensor-content-border">Current Reading</h2>
+        <h2 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300 pb-2 sensor-content-border">{{ t('sensor.currentReading') }}</h2>
         <ACurrentReading :sensor="props.sensor" />
       </div>
 
       <div class="lg:col-span-2 sensor-content">
-        <h2 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300 pb-2 mb-4 sensor-content-border">Historical Data</h2>
+        <h2 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300 pb-2 mb-4 sensor-content-border">{{ t('sensor.historicalData') }}</h2>
         <ADataTable :sensor="props.sensor" :from-date="fromDate" :to-date="toDate" />
       </div>
     </div>
 
     <div class="mt-6 sensor-content">
-      <h2 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300 pb-2 mb-4 sensor-content-border">Data Visualization</h2>
+      <h2 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300 pb-2 mb-4 sensor-content-border">{{ t('sensor.dataVisualization') }}</h2>
       <ADataGraph :sensor="props.sensor" :from-date="fromDate" :to-date="toDate" />
     </div>
 
@@ -133,7 +136,7 @@ updateTimeRange(1);
 
   <Dialog
       v-model:visible="isTimeRangeMenuOpen"
-      header="Select Time Range"
+      :header="t('time.selectTimeRange')"
       :modal="false"
       closable
       style="position: fixed; top:10px; right:10px; width: 300px;"

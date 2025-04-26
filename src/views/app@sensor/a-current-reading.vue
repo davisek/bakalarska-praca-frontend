@@ -6,6 +6,9 @@ import {formatDateTime} from "@/utils/dateUtil.ts";
 import {Sensor, CurrentSensorData, MqttSensorPayload} from '@/types';
 import ALoadingScreen from "@/components/a-loading-screen.vue";
 import AErrorMessage from "@/components/a-error-message.vue";
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const props = defineProps({
   sensor: {
@@ -32,7 +35,7 @@ const fetchSensorData = async () => {
     sensorData.created_at = response.created_at;
     errorMessage.value = null;
   } catch (err) {
-    errorMessage.value = `Failed to load ${props.sensor.type} data.`;
+    errorMessage.value = t('currentReading.loadError', { sensor: props.sensor.type });
   } finally {
     isLoading.value = false;
     sensorData.symbol = props.sensor.unit_of_measurement;
@@ -94,7 +97,7 @@ onUnmounted(() => {
         <div class="flex items-center text-lg text-gray-400 mt-6 justify-center">
           <i class="pi pi-clock mr-2 text-gray-400"></i>
           <span v-if="sensorData.created_at">{{ formatDateTime(sensorData.created_at) }}</span>
-          <span v-else class="text-gray-500">No data available</span>
+          <span v-else class="text-gray-500">{{ t('currentReading.noData') }}</span>
         </div>
       </div>
     </div>

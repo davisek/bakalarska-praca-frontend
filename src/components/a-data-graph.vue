@@ -7,8 +7,11 @@ import axiosInstance from "@/plugins/axios";
 import {formatDateTime} from "@/utils/dateUtil";
 import { Sensor, SensorReading, SensorStatistics, ChartOptions, ChartContext } from '@/types';
 import AErrorMessage from "@/components/a-error-message.vue";
+import { useI18n } from 'vue-i18n';
 
 ChartJS.register(CrosshairPlugin, Title, Tooltip, Legend, LineElement, PointElement, LinearScale, CategoryScale);
+
+const { t } = useI18n();
 
 const props = defineProps({
   sensor: {
@@ -43,6 +46,8 @@ const chartOptions = ref<ChartOptions>({});
 const errorMessage = ref<string | null>(null);
 const isLoading = ref(true);
 const chartContainerRef = ref<HTMLElement | null>(null);
+
+const isDarkMode = ref(localStorage.getItem('user')?.includes('dark_mode":true') || true);
 
 const toggleFullscreen = () => {
   if (!chartContainerRef.value) return;
@@ -106,7 +111,7 @@ const loadChartData = async () => {
           legend: {
             display: true,
             labels: {
-              color: '#e2e8f0',
+              color: isDarkMode.value ? '#e2e8f0' : '#334155',
               font: {
                 size: 14,
                 weight: 'bold'
@@ -135,9 +140,9 @@ const loadChartData = async () => {
                 return `${value} ${symbol.value}`;
               }
             },
-            backgroundColor: 'rgba(17, 24, 39, 0.9)',
+            backgroundColor: isDarkMode.value ? 'rgba(17, 24, 39, 0.9)' : 'rgba(255, 255, 255, 0.9)',
             titleColor: '#a78bfa',
-            bodyColor: '#f8fafc',
+            bodyColor: isDarkMode.value ? '#f8fafc' : '#1e293b',
             borderColor: 'rgba(124, 58, 237, 0.5)',
             borderWidth: 1,
             bodyFont: {
@@ -156,7 +161,7 @@ const loadChartData = async () => {
         scales: {
           x: {
             grid: {
-              color: 'rgba(75, 85, 99, 0.3)',
+              color: isDarkMode.value ? 'rgba(75, 85, 99, 0.3)' : 'rgba(75, 85, 99, 0.1)',
               drawBorder: false,
             },
             ticks: {
@@ -165,19 +170,19 @@ const loadChartData = async () => {
               font: {
                 size: 12,
               },
-              color: '#9ca3af',
+              color: isDarkMode.value ? '#9ca3af' : '#4b5563',
             },
           },
           y: {
             grid: {
-              color: 'rgba(75, 85, 99, 0.3)',
+              color: isDarkMode.value ? 'rgba(75, 85, 99, 0.3)' : 'rgba(75, 85, 99, 0.1)',
               drawBorder: false,
             },
             ticks: {
               font: {
                 size: 12,
               },
-              color: '#9ca3af',
+              color: isDarkMode.value ? '#9ca3af' : '#4b5563',
             },
           }
         },
@@ -189,10 +194,10 @@ const loadChartData = async () => {
 
       errorMessage.value = null;
     } else {
-      errorMessage.value = 'There are no data for this date range.';
+      errorMessage.value = t('common.noDataForRange');
     }
   } catch (error) {
-    errorMessage.value = 'Failed to load data. Please try again.';
+    errorMessage.value = t('common.failedToLoad');
   } finally {
     isLoading.value = false;
   }
@@ -236,13 +241,13 @@ onUnmounted(() => {
       <AErrorMessage :errorMessage="errorMessage" />
     </div>
 
-    <div v-else class="bg-gray-900/70 mb-8 rounded-xl overflow-hidden border border-gray-700/50">
+    <div v-else :class="['mb-8 rounded-xl overflow-hidden border', isDarkMode ? 'bg-gray-900/70 border-gray-700/50' : 'bg-white border-gray-200']">
       <div>
-        <h2 class="chart-title">{{ props.sensor.display_name }} Readings</h2>
+        <h2 :class="['chart-title', isDarkMode ? 'text-white' : 'text-gray-900']">{{ t('sensor.readings', { name: props.sensor.display_name }) }}</h2>
         <button
             @click="toggleFullscreen"
             class="expand-button mr-4"
-            title="Toggle fullscreen"
+            :title="t('common.toggleFullscreen')"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 ml-1 mt-1">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
@@ -277,47 +282,48 @@ onUnmounted(() => {
 
     <div v-if="errorMessage === null" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
-      <div class="stat-card">
-        <div class="stat-icon-wrapper min-icon bg-blue-900/30 text-blue-400">
+      <div :class="['stat-card', isDarkMode ? 'bg-gray-900/70' : 'bg-white']">
+        <div :class="['stat-icon-wrapper min-icon', isDarkMode ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-600']">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="stat-icon">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
           </svg>
         </div>
         <div>
-          <h5 class="stat-label">Minimum Value</h5>
-          <div class="stat-value">{{ statistics.min }} <span class="stat-unit">{{ symbol }}</span></div>
+          <h5 :class="['stat-label', isDarkMode ? 'text-gray-400' : 'text-gray-600']">{{ t('sensor.minimumValue') }}</h5>
+          <div :class="['stat-value', isDarkMode ? 'text-white' : 'text-gray-900']">{{ statistics.min }} <span :class="['stat-unit', isDarkMode ? 'text-gray-400' : 'text-gray-600']">{{ symbol }}</span></div>
         </div>
       </div>
 
-      <div class="stat-card">
-        <div class="stat-icon-wrapper avg-icon bg-purple-900/30 text-purple-400">
+      <div :class="['stat-card', isDarkMode ? 'bg-gray-900/70' : 'bg-white']">
+        <div :class="['stat-icon-wrapper avg-icon', isDarkMode ? 'bg-purple-900/30 text-purple-400' : 'bg-purple-100 text-purple-600']">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="stat-icon">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4.499 8.248h15m-15 7.501h15" />
           </svg>
         </div>
         <div>
-          <h5 class="stat-label">Average Value</h5>
-          <div class="stat-value">{{ statistics.avg }} <span class="stat-unit">{{ symbol }}</span></div>
+          <h5 :class="['stat-label', isDarkMode ? 'text-gray-400' : 'text-gray-600']">{{ t('sensor.averageValue') }}</h5>
+          <div :class="['stat-value', isDarkMode ? 'text-white' : 'text-gray-900']">{{ statistics.avg }} <span :class="['stat-unit', isDarkMode ? 'text-gray-400' : 'text-gray-600']">{{ symbol }}</span></div>
         </div>
       </div>
 
-      <div class="stat-card">
-        <div class="stat-icon-wrapper max-icon bg-orange-900/30 text-orange-400">
+      <div :class="['stat-card', isDarkMode ? 'bg-gray-900/70' : 'bg-white']">
+        <div :class="['stat-icon-wrapper max-icon', isDarkMode ? 'bg-orange-900/30 text-orange-400' : 'bg-orange-100 text-orange-600']">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="stat-icon">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
           </svg>
         </div>
         <div>
-          <h5 class="stat-label">Maximum Value</h5>
-          <div class="stat-value">{{ statistics.max }} <span class="stat-unit">{{ symbol }}</span></div>
+          <h5 :class="['stat-label', isDarkMode ? 'text-gray-400' : 'text-gray-600']">{{ t('sensor.maximumValue') }}</h5>
+          <div :class="['stat-value', isDarkMode ? 'text-white' : 'text-gray-900']">{{ statistics.max }} <span :class="['stat-unit', isDarkMode ? 'text-gray-400' : 'text-gray-600']">{{ symbol }}</span></div>
         </div>
       </div>
 
-      <div class="stat-card">
+      <div :class="['stat-card', isDarkMode ? 'bg-gray-900/70' : 'bg-white']">
         <div
             class="stat-icon-wrapper"
-            :class="percentageDifference === null ? 'bg-gray-800/50 text-gray-400' :
-                 percentageDifference > 0 ? 'up-icon bg-green-900/30 text-green-400' : 'down-icon bg-red-900/30 text-red-400'"
+            :class="percentageDifference === null ? (isDarkMode ? 'bg-gray-800/50 text-gray-400' : 'bg-gray-100 text-gray-600') :
+                 percentageDifference > 0 ? (isDarkMode ? 'up-icon bg-green-900/30 text-green-400' : 'bg-green-100 text-green-600') :
+                 (isDarkMode ? 'down-icon bg-red-900/30 text-red-400' : 'bg-red-100 text-red-600')"
         >
           <svg v-if="percentageDifference === null" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="stat-icon">
             <path stroke-linecap="round" stroke-linejoin="round" d="M18 12H6" />
@@ -330,8 +336,8 @@ onUnmounted(() => {
           </svg>
         </div>
         <div>
-          <h5 class="stat-label">Trend</h5>
-          <div class="stat-value">
+          <h5 :class="['stat-label', isDarkMode ? 'text-gray-400' : 'text-gray-600']">{{ t('sensor.trend') }}</h5>
+          <div :class="['stat-value', isDarkMode ? 'text-white' : 'text-gray-900']">
             <span>{{ percentageDifference !== null ? percentageDifference.toFixed(2) + "%" : "N/A" }}</span>
             <span class="text-sm font-normal ml-2 opacity-80" v-if="valueDifference !== null">
               ({{ valueDifference > 0 ? '+' : '' }}{{ valueDifference.toFixed(2) }} {{ symbol }})
@@ -345,13 +351,30 @@ onUnmounted(() => {
 
 <style scoped>
 .chart-title {
-  @apply text-xl font-bold text-white py-4 px-6 bg-gray-800/80 border-b border-gray-700/50;
+  @apply text-xl font-bold py-4 px-6;
+}
+
+.dark-theme .chart-title {
+  @apply bg-gray-800/80 border-b border-gray-700/50;
   background-image: linear-gradient(to right, rgba(124, 58, 237, 0.05), rgba(79, 209, 197, 0.05));
 }
 
+.light-theme .chart-title {
+  @apply bg-gray-50 border-b border-gray-200;
+  background-image: linear-gradient(to right, rgba(124, 58, 237, 0.02), rgba(79, 209, 197, 0.02));
+}
+
 .stat-card {
-  @apply flex items-center p-4 rounded-lg bg-gray-900/70 border border-gray-700/50 transition-all duration-200;
+  @apply flex items-center p-4 rounded-lg border transition-all duration-200;
   @apply hover:shadow-lg;
+}
+
+.dark-theme .stat-card {
+  @apply border-gray-700/50;
+}
+
+.light-theme .stat-card {
+  @apply border-gray-200;
 }
 
 .stat-icon-wrapper {
@@ -383,14 +406,14 @@ onUnmounted(() => {
 }
 
 .stat-label {
-  @apply text-gray-400 text-sm mb-1;
+  @apply text-sm mb-1;
 }
 
 .stat-value {
-  @apply text-xl font-bold text-white;
+  @apply text-xl font-bold;
 }
 
 .stat-unit {
-  @apply text-lg text-gray-400;
+  @apply text-lg;
 }
 </style>

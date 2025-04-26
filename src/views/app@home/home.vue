@@ -7,6 +7,9 @@ import { RouterLink, useRoute } from "vue-router";
 import { SensorGroup } from '@/types/index';
 import ALoadingScreen from "@/components/a-loading-screen.vue";
 import AErrorMessage from "@/components/a-error-message.vue";
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const groups = ref<SensorGroup[]>([]);
 const errorMessage = ref<string | null>(null);
@@ -18,7 +21,7 @@ const fetchSensors = async () => {
     const response = await axiosInstance.get<SensorGroup[]>('sensor-groups');
     groups.value = response;
   } catch (err) {
-    errorMessage.value = 'Failed to load data. Please try again.';
+    errorMessage.value = t('home.loadError');
     console.error(err);
   } finally {
     isLoading.value = false;
@@ -71,7 +74,7 @@ const route = useRoute();
             </div>
 
             <div class="flex justify-end items-center mt-4 text-sm opacity-70">
-              <span class="mr-2">View Details</span>
+              <span class="mr-2">{{ t('home.viewDetails') }}</span>
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 transform group-hover:translate-x-1 transition-transform">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
               </svg>

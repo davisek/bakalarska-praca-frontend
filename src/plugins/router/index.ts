@@ -12,6 +12,9 @@ import AdminUsers from "@/views/app@admin/app@users/admin-users.vue";
 import AdminSensors from "@/views/app@admin/app@sensors/admin-sensors.vue";
 import {showError} from "@/utils/notificationUtil.ts";
 import AdminDashboard from "@/views/app@admin/admin-dashboard.vue";
+import i18n from '@/plugins/i18n';
+
+const t = i18n.global.t;
 
 const routes: Array<RouteRecordRaw> = [
     {
@@ -98,7 +101,7 @@ router.beforeEach((to, from, next) => {
     }
 
     if (requiresAuth && !isAuthenticated) {
-        showError('You must be logged in to access this page');
+        showError(t('auth.adminAccessRequired'));
         next({ name: 'Login' });
         return;
     }
@@ -107,7 +110,7 @@ router.beforeEach((to, from, next) => {
         const userData = localStorage.getItem('user');
 
         if (!userData) {
-            showError('Session data is missing. Please log in again.');
+            // showError(t('auth.missingSessionData'));
             next({ name: 'Login' });
             return;
         }
@@ -122,8 +125,7 @@ router.beforeEach((to, from, next) => {
 
             next();
         } catch (error) {
-            console.error('Error parsing user data:', error);
-            showError('Session data is invalid. Please log in again.');
+            // showError(t('auth.invalidSessionData'));
             next({ name: 'Login' });
         }
     } else {
@@ -162,7 +164,6 @@ const loadPathsForSensorRoutes = async () => {
             });
         });
     } catch (error) {
-        console.error('Failed to load sensor groups:', error);
     }
 };
 

@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from "@/utils/authStore.ts";
+import AThemeLanguageButtons from '@/components/a-theme-language-buttons.vue';
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const props = defineProps({
   isOpen: Boolean
 });
@@ -38,22 +41,26 @@ function isActive(path: string) {
 <template>
   <div v-if="isOpen" class="mobile-menu">
     <div class="flex justify-between items-center mb-8 pb-4 border-b border-white/10">
-      <h1 class="text-2xl font-bold text-white">SensorDataApp</h1>
+      <h1 class="text-2xl font-bold text-white">{{ t('nav.appTitle') }}</h1>
       <Button
           icon="pi pi-times"
           @click="closeMenu"
           text
           rounded
-          aria-label="Close"
+          :aria-label="t('common.close')"
           class="p-2"
       />
+    </div>
+
+    <div class="mb-6 flex justify-center">
+      <AThemeLanguageButtons />
     </div>
 
     <div class="mb-8">
       <div v-if="authStore.isAuthenticated" class="flex flex-col items-center gap-4">
         <div class="flex flex-wrap justify-center gap-2 w-full">
           <Button
-              label="Profile"
+              :label="t('common.profile')"
               icon="pi pi-user"
               iconPos="right"
               @click="openProfile"
@@ -61,7 +68,7 @@ function isActive(path: string) {
               text
           />
           <Button
-              label="Settings"
+              :label="t('common.settings')"
               icon="pi pi-cog"
               iconPos="right"
               @click="openSettings"
@@ -69,7 +76,7 @@ function isActive(path: string) {
               text
           />
           <Button
-              label="Sign out"
+              :label="t('common.logout')"
               icon="pi pi-sign-out"
               iconPos="right"
               @click="authStore.logout"
@@ -82,13 +89,13 @@ function isActive(path: string) {
 
       <div v-else class="flex flex-col gap-3">
         <Button
-            label="Login"
+            :label="t('common.login')"
             @click="navigate('/login')"
             severity="help"
             class="login-btn"
         />
         <Button
-            label="Register"
+            :label="t('common.register')"
             @click="navigate('/register')"
             severity="help"
             outlined
@@ -99,7 +106,7 @@ function isActive(path: string) {
 
     <nav class="flex flex-col gap-4 mt-4">
       <Button
-          label="Dashboard"
+          :label="t('nav.dashboard')"
           @click="navigate('/dashboard')"
           :class="['nav-item', { 'active': isActive('/dashboard') }]"
           severity="help"
@@ -108,7 +115,7 @@ function isActive(path: string) {
       />
 
       <Button
-          label="Groups"
+          :label="t('nav.groups')"
           @click="navigate('/groups')"
           :class="['nav-item', { 'active': isActive('/groups') }]"
           severity="help"
@@ -117,7 +124,7 @@ function isActive(path: string) {
       />
 
       <Button
-          label="Statistics"
+          :label="t('nav.statistics')"
           @click="navigate('/statistics')"
           :class="['nav-item', { 'active': isActive('/statistics') }]"
           severity="help"

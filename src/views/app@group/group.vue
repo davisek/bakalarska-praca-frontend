@@ -2,6 +2,9 @@
 import ABreadcrumb from "@/components/a-breadcrumb.vue";
 import {RouterLink, useRoute} from 'vue-router';
 import { Sensor } from '@/types';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const props = defineProps({
   sensors: {
@@ -47,7 +50,7 @@ const route = useRoute();
           <p class="text-sm text-gray-400 mb-3">{{ sensor.display_name }}</p>
 
           <div class="flex items-center justify-center gap-1 text-xs text-gray-500 opacity-80 group">
-            <span>View details</span>
+            <span>{{ t('group.viewDetails') }}</span>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3 transition-transform group-hover:translate-x-1">
               <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
             </svg>

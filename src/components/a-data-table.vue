@@ -5,6 +5,9 @@ import {formatDateTime} from "@/utils/dateUtil";
 import {Sensor, SensorReading, PaginationMeta, PaginatedResponse} from '@/types';
 import AErrorMessage from "@/components/a-error-message.vue";
 import {showError, showSuccess} from "@/utils/notificationUtil.ts";
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const props = defineProps({
   sensor: {
@@ -79,11 +82,11 @@ const fetchRawData = async () => {
       };
       errorMessage.value = null;
     } else {
-      errorMessage.value = 'There are no data for this date range.';
+      errorMessage.value = t('common.noDataForRange');
       tableData.value = [];
     }
   } catch (error) {
-    errorMessage.value = 'Failed to load data. Please try again.';
+    errorMessage.value = t('common.failedToLoad');
   } finally {
     isLoading.value = false;
   }
@@ -102,10 +105,10 @@ const exportXLSX = async () => {
 
     window.open(downloadUrl, '_blank');
 
-    showSuccess('File downloading..');
+    showSuccess(t('sensor.exportSuccess'));
     errorMessage.value = null;
   } catch (error) {
-    showError('Failed to download file. Please try again.');
+    showError(t('sensor.exportError'));
   } finally {
     isLoading.value = false;
   }
@@ -157,10 +160,10 @@ watch(() => props.sensor.type, () => {
             responsiveLayout="scroll"
         >
           <template #paginatorstart>
-            <Button @click="fetchRawData" type="button" icon="pi pi-refresh" text />
+            <Button @click="fetchRawData" type="button" icon="pi pi-refresh" text :title="t('common.refresh')" />
           </template>
           <template #paginatorend>
-            <Button @click="exportXLSX" type="button" icon="pi pi-download" text />
+            <Button @click="exportXLSX" type="button" icon="pi pi-download" text :title="t('common.download')" />
           </template>
 
           <Column
@@ -170,8 +173,7 @@ watch(() => props.sensor.type, () => {
               :bodyStyle="{ textAlign: 'center' }"
           >
             <template #header>
-              <div style="width: 100%; text-align: center; font-weight: 600;">Value</div>
-            </template>
+              <div style="width: 100%; text-align: center; font-weight: 600;">{{ t('sensor.value') }}</div>            </template>
             <template #body="{ data }">
               <span class="font-bold">{{ data.value }}</span>
               <span class="text-gray-400 text-sm ml-1">{{ data.symbol }}</span>
@@ -185,8 +187,7 @@ watch(() => props.sensor.type, () => {
               :bodyStyle="{ textAlign: 'center' }"
           >
             <template #header>
-              <div style="width: 100%; text-align: center; font-weight: 600;">Recorded at</div>
-            </template>
+              <div style="width: 100%; text-align: center; font-weight: 600;">{{ t('sensor.recordedAt') }}</div>            </template>
             <template #body="{ data }">
               {{ formatDateTime(data.created_at) }}
             </template>
@@ -198,8 +199,7 @@ watch(() => props.sensor.type, () => {
               :bodyStyle="{ textAlign: 'center' }"
           >
             <template #header>
-              <div style="width: 100%; text-align: center; font-weight: 600;">Percentage change</div>
-            </template>
+              <div style="width: 100%; text-align: center; font-weight: 600;">{{ t('sensor.percentageChange') }}</div>            </template>
             <template #body="{ data }">
               <span v-if="data.percentageChange !== null"
                     :class="data.percentageChange > 0 ? 'text-green-400' :

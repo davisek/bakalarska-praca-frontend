@@ -5,6 +5,9 @@ import axiosInstance from '@/plugins/axios';
 import ABreadcrumb from "@/components/a-breadcrumb.vue";
 import { showSuccess, showError } from '@/utils/notificationUtil';
 import {Enum} from "@/types";
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const router = useRouter();
 const isLoading = ref(false);
@@ -28,7 +31,7 @@ const passwordConfirmationError = ref('');
 
 const validateName = () => {
   if (!form.value.name) {
-    nameError.value = 'Name is required';
+    nameError.value = t('register.nameRequired');
     return false;
   }
   nameError.value = '';
@@ -37,7 +40,7 @@ const validateName = () => {
 
 const validateSurname = () => {
   if (!form.value.surname) {
-    surnameError.value = 'Surname is required';
+    surnameError.value = t('register.surnameRequired');
     return false;
   }
   surnameError.value = '';
@@ -46,10 +49,10 @@ const validateSurname = () => {
 
 const validateEmail = () => {
   if (!form.value.email) {
-    emailError.value = 'Email is required';
+    emailError.value = t('register.emailRequired');
     return false;
   } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(form.value.email)) {
-    emailError.value = 'Email must be valid';
+    emailError.value = t('register.emailValid');
     return false;
   }
   emailError.value = '';
@@ -58,10 +61,10 @@ const validateEmail = () => {
 
 const validatePassword = () => {
   if (!form.value.password) {
-    passwordError.value = 'Password is required';
+    passwordError.value = t('register.passwordRequired');
     return false;
   } else if (form.value.password.length < 8) {
-    passwordError.value = 'Password must be at least 8 characters';
+    passwordError.value = t('register.passwordLength');
     return false;
   }
   passwordError.value = '';
@@ -70,10 +73,10 @@ const validatePassword = () => {
 
 const validatePasswordConfirmation = () => {
   if (!form.value.password_confirmation) {
-    passwordConfirmationError.value = 'Password confirmation is required';
+    passwordConfirmationError.value = t('register.passwordConfirmRequired');
     return false;
   } else if (form.value.password_confirmation !== form.value.password) {
-    passwordConfirmationError.value = 'Passwords must match';
+    passwordConfirmationError.value = t('register.passwordsMatch');
     return false;
   }
   passwordConfirmationError.value = '';
@@ -86,7 +89,7 @@ const getLocale = async () => {
     const response = await axiosInstance.get(`/auth/locale`);
     locales.value = response.locales;
   } catch (error) {
-    showError('Unknown error.');
+    showError(t('register.unknownError'));
   } finally {
     isLoading.value = false;
   }
@@ -134,7 +137,7 @@ const onSubmit = async () => {
 
           const firstErrorField = Object.keys(errors)[0];
           const firstError = errors[firstErrorField];
-          showError(Array.isArray(firstError) ? firstError[0] : 'Validation error');
+          showError(Array.isArray(firstError) ? firstError[0] : t('register.validationError'));
 
           if (errors.name) nameError.value = errors.name[0];
           if (errors.surname) surnameError.value = errors.surname[0];
@@ -142,10 +145,10 @@ const onSubmit = async () => {
           if (errors.password) passwordError.value = errors.password[0];
           if (errors.password_confirmation) passwordConfirmationError.value = errors.password_confirmation[0];
         } else {
-          showError('Registration failed. Please try again.');
+          showError(t('register.registrationFailed'));
         }
       } else {
-        showError('Unable to connect to the server. Please try again later.');
+        showError(t('register.connectionError'));
       }
     } finally {
       isLoading.value = false;
@@ -175,8 +178,8 @@ const goToLogin = () => {
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
               </svg>
             </div>
-            <h2 class="text-3xl font-bold text-purple-300">Create Account</h2>
-            <p class="mt-2 text-gray-400">Sign up for a new account</p>
+            <h2 class="text-3xl font-bold text-purple-300">{{ t('register.createAccount') }}</h2>
+            <p class="mt-2 text-gray-400">{{ t('register.signUpDescription') }}</p>
           </div>
 
           <Form @submit.prevent="onSubmit">
@@ -187,7 +190,7 @@ const goToLogin = () => {
                     :invalid="!!nameError"
                     variant="outlined"
                     name="name"
-                    placeholder="First Name"
+                    :placeholder="t('register.firstName')"
                     @blur="validateName"
                 />
                 <Message v-if="nameError" severity="error" size="small" variant="simple">{{ nameError }}</Message>
@@ -199,7 +202,7 @@ const goToLogin = () => {
                     :invalid="!!surnameError"
                     variant="outlined"
                     name="surname"
-                    placeholder="Last Name"
+                    :placeholder="t('register.lastName')"
                     @blur="validateSurname"
                 />
                 <Message v-if="surnameError" severity="error" size="small" variant="simple">{{ surnameError }}</Message>
@@ -213,7 +216,7 @@ const goToLogin = () => {
                   variant="outlined"
                   name="email"
                   type="email"
-                  placeholder="Email"
+                  :placeholder="t('register.email')"
                   @blur="validateEmail"
               />
               <Message v-if="emailError" severity="error" size="small" variant="simple">{{ emailError }}</Message>
@@ -226,7 +229,7 @@ const goToLogin = () => {
                   variant="outlined"
                   inputClass="w-full"
                   :toggleMask="true"
-                  placeholder="Password"
+                  :placeholder="t('register.password')"
                   @blur="validatePassword"
               />
               <Message v-if="passwordError" severity="error" size="small" variant="simple">{{ passwordError }}</Message>
@@ -240,7 +243,7 @@ const goToLogin = () => {
                   inputClass="w-full"
                   :feedback="false"
                   :toggleMask="true"
-                  placeholder="Confirm Password"
+                  :placeholder="t('register.confirmPassword')"
                   @blur="validatePasswordConfirmation"
               />
               <Message v-if="passwordConfirmationError" severity="error" size="small" variant="simple">{{ passwordConfirmationError }}</Message>
@@ -271,7 +274,7 @@ const goToLogin = () => {
             <div class="mb-4">
               <Button
                   type="submit"
-                  label="Create Account"
+                  :label="t('register.createAccount')"
                   severity="help"
                   icon="pi pi-user-plus"
                   :isLoading="isLoading"
@@ -280,8 +283,8 @@ const goToLogin = () => {
             </div>
 
             <div class="text-center mt-2 text-sm text-gray-400">
-              Already have an account?
-              <a @click="goToLogin" class="ml-1 text-purple-300 hover:text-purple-200 cursor-pointer">Sign in</a>
+              {{ t('register.alreadyHaveAccount') }}
+              <a @click="goToLogin" class="ml-1 text-purple-300 hover:text-purple-200 cursor-pointer">{{ t('register.signIn') }}</a>
             </div>
           </Form>
         </div>
