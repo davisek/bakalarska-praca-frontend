@@ -23,7 +23,7 @@
     --p-form-field-focus-border-color: var(--primary-color)!important;
 }
 
-.light-theme {
+/* .light-theme {
     --primary-color: rgb(79, 70, 229);
     --primary-color-hover: rgb(67, 56, 202);
 
@@ -43,7 +43,7 @@
     --text-color-secondary: rgba(0, 0, 0, 0.6);
 
     --highlight-bg: rgba(79, 70, 229, 0.16);
-}
+} */
 
 .p-tabmenu .p-tabmenu-nav .p-tabmenuitem.p-highlight .p-menuitem-link {
     color: var(--primary-color);
@@ -95,7 +95,7 @@
 }
 
 .light-theme .p-datatable {
-    background-color: rgb(255 255 255 / 0.9);
+    background-color: rgb(255 255 255 / 0.5);
     border: 1px solid rgb(209 213 219 / 0.5);
     border-radius: 0.5rem;
     overflow: hidden;

@@ -6,8 +6,10 @@ import ABreadcrumb from "@/components/a-breadcrumb.vue";
 import ACurrentReading from "@/views/app@sensor/a-current-reading.vue";
 import { Sensor, TimeRangeOption } from '@/types';
 import { useI18n } from 'vue-i18n';
+import { useTheme } from '@/utils/themeUtil';
 
 const { t } = useI18n();
+const isDarkMode = useTheme();
 
 const props = defineProps({
   sensor: {
@@ -66,7 +68,7 @@ watch(dates, (newDates) => {
     fromDate.value = formatLocalDateSkIso(newDates[0]);
     toDate.value = formatLocalDateSkIso(newDates[1]);
   }
-  console.log(toDate.value);
+  // console.log(toDate.value);
 });
 
 const closeTimeRangeMenu = () => {
@@ -107,18 +109,18 @@ updateTimeRange(1);
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div class="sensor-content">
-        <h2 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300 pb-2 sensor-content-border">{{ t('sensor.currentReading') }}</h2>
+        <h2 :class="['text-2xl font-bold bg-clip-text pb-2 sensor-content-border', isDarkMode ? 'dark-text-gradient-color' : 'dark-text-gradient-color']">{{ t('sensor.currentReading') }}</h2>
         <ACurrentReading :sensor="props.sensor" />
       </div>
 
       <div class="lg:col-span-2 sensor-content">
-        <h2 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300 pb-2 mb-4 sensor-content-border">{{ t('sensor.historicalData') }}</h2>
+        <h2 :class="['text-2xl font-bold bg-clip-text pb-2 mb-4 sensor-content-border', isDarkMode ? 'dark-text-gradient-color' : 'dark-text-gradient-color']">{{ t('sensor.historicalData') }}</h2>
         <ADataTable :sensor="props.sensor" :from-date="fromDate" :to-date="toDate" />
       </div>
     </div>
 
     <div class="mt-6 sensor-content">
-      <h2 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300 pb-2 mb-4 sensor-content-border">{{ t('sensor.dataVisualization') }}</h2>
+      <h2 :class="['text-2xl font-bold bg-clip-text pb-2 mb-4 sensor-content-border', isDarkMode ? 'dark-text-gradient-color' : 'dark-text-gradient-color']">{{ t('sensor.dataVisualization') }}</h2>
       <ADataGraph :sensor="props.sensor" :from-date="fromDate" :to-date="toDate" />
     </div>
 
@@ -129,7 +131,6 @@ updateTimeRange(1);
         icon="pi pi-clock"
         class="h-10"
         @click="isTimeRangeMenuOpen = !isTimeRangeMenuOpen"
-        variant="outlined"
         severity="help"
     />
   </div>

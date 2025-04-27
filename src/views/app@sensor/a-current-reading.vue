@@ -7,8 +7,10 @@ import {Sensor, CurrentSensorData, MqttSensorPayload} from '@/types';
 import ALoadingScreen from "@/components/a-loading-screen.vue";
 import AErrorMessage from "@/components/a-error-message.vue";
 import { useI18n } from 'vue-i18n';
+import { useTheme } from '@/utils/themeUtil'
 
 const { t } = useI18n();
+const isDarkMode = useTheme();
 
 const props = defineProps({
   sensor: {
@@ -46,13 +48,14 @@ const handleMQTTMessage = (topic: string, message: Buffer) => {
   const payload = JSON.parse(message.toString()) as MqttSensorPayload;
   if (topic === `${props.sensor.type}-data`) {
     sensorData.value = payload.value;
-    sensorData.created_at = payload.created_at;
+    sensorData.created_at = new Date().toISOString();
+    sensorData.symbol = props.sensor.unit_of_measurement;
   }
 };
 
 const subscribeToMQTTTopics = () => {
   mqttClient.subscribe(`${props.sensor.type}-data`, (err) => {
-    if (!err) console.log('Subscribed to sensor');
+    // if (!err) console.log('Subscribed to sensor');
     errorMessage.value = null;
   });
 
@@ -83,19 +86,21 @@ onUnmounted(() => {
   <div class="rounded-lg relative flex flex-col justify-center items-center h-full pb-8">
     <ALoadingScreen :is-loading="isLoading" />
     <AErrorMessage :errorMessage="errorMessage" />
-
     <div v-if="!isLoading && !errorMessage" class="flex flex-col justify-center items-center h-full w-full">
       <div class="mb-4">
-        <h3 class="text-lg font-bold text-gray-500">{{ props.sensor.display_name }}</h3>
+        <h3 :class="['text-lg font-bold', isDarkMode ? 'text-gray-500' : 'text-white']">
+          {{ props.sensor.display_name }}
+        </h3>
       </div>
-
       <div class="flex flex-col justify-center items-center">
         <div class="flex items-baseline justify-center">
           <span class="value-number">{{ sensorData.value }}</span>
-          <span class="value-unit">{{ sensorData.symbol }}</span>
+          <span :class="['value-unit', isDarkMode ? 'text-gray-400' : 'text-white']">
+            {{ sensorData.symbol || props.sensor.unit_of_measurement}}
+          </span>
         </div>
-        <div class="flex items-center text-lg text-gray-400 mt-6 justify-center">
-          <i class="pi pi-clock mr-2 text-gray-400"></i>
+        <div class="flex items-center text-lg mt-6 justify-center" :class="isDarkMode ? 'text-gray-400' : 'text-white'">
+          <i class="pi pi-clock mr-2" :class="isDarkMode ? 'text-gray-400' : 'text-white'"></i>
           <span v-if="sensorData.created_at">{{ formatDateTime(sensorData.created_at) }}</span>
           <span v-else class="text-gray-500">{{ t('currentReading.noData') }}</span>
         </div>
@@ -106,11 +111,11 @@ onUnmounted(() => {
 
 <style scoped>
 .value-number {
-  @apply xl:text-8xl text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300 shadow-sm;
+  @apply xl:text-6xl text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300 shadow-sm;
 }
 
 .value-unit {
-  @apply xl:text-4xl text-lg ml-2 text-gray-400 font-medium;
+  @apply xl:text-4xl text-lg ml-2 font-medium;
 }
 
 @keyframes pulse {

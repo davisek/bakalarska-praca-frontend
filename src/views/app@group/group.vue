@@ -3,9 +3,10 @@ import ABreadcrumb from "@/components/a-breadcrumb.vue";
 import {RouterLink, useRoute} from 'vue-router';
 import { Sensor } from '@/types';
 import { useI18n } from 'vue-i18n';
+import { useTheme } from '@/utils/themeUtil';
 
 const { t } = useI18n();
-
+const isDarkMode = useTheme();
 const props = defineProps({
   sensors: {
     type: Array as () => Sensor[],
@@ -23,7 +24,7 @@ const route = useRoute();
     <div
         v-for="sensor in props.sensors"
         :key="sensor.type"
-        :class="[(sensor.color_class.value || 'default-card'), 'sensor-card']"
+        :class="[(sensor.color_class.value || 'default-card'), 'sensor-card group', isDarkMode ? 'bg-gray-800' : 'bg-gray-200']"
     >
       <router-link
           :to="`${route.path}/${sensor.type}`"
@@ -46,12 +47,12 @@ const route = useRoute();
         </div>
 
         <div class="p-4 text-center">
-          <h3 class="text-xl font-bold text-white mb-1 transition-colors">{{ sensor.sensor_name }}</h3>
-          <p class="text-sm text-gray-400 mb-3">{{ sensor.display_name }}</p>
+          <h3 :class="['text-xl font-bold mb-1 transition-colors' , isDarkMode ? 'text-white' : 'text-black']">{{ sensor.sensor_name }}</h3>
+          <p :class="['text-sm mb-3', isDarkMode ? 'text-gray-400' : 'text-gray-500']">{{ sensor.display_name }}</p>
 
-          <div class="flex items-center justify-center gap-1 text-xs text-gray-500 opacity-80 group">
+          <div :class="['flex items-center justify-center gap-1 text-xs opacity-80' , isDarkMode ? 'text-gray-500' : 'text-gray-800']">
             <span>{{ t('group.viewDetails') }}</span>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3 transition-transform group-hover:translate-x-1">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3 transform group-hover:translate-x-1 transition-transform">
               <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
             </svg>
           </div>
@@ -63,7 +64,7 @@ const route = useRoute();
 
 <style scoped>
 .sensor-card {
-  @apply bg-gray-800 rounded-xl overflow-hidden shadow-lg border border-white/5;
+  @apply rounded-xl overflow-hidden shadow-lg border border-white/5;
   @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-2 hover:scale-[1.02];
 }
 

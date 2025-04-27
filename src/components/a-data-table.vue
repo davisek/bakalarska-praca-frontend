@@ -6,8 +6,10 @@ import {Sensor, SensorReading, PaginationMeta, PaginatedResponse} from '@/types'
 import AErrorMessage from "@/components/a-error-message.vue";
 import {showError, showSuccess} from "@/utils/notificationUtil.ts";
 import { useI18n } from 'vue-i18n';
+import { useTheme } from '@/utils/themeUtil';
 
 const { t } = useI18n();
+const isDarkMode = useTheme();
 
 const props = defineProps({
   sensor: {
@@ -140,84 +142,131 @@ watch(() => props.sensor.type, () => {
 </script>
 
 <template>
-      <div class="overflow-x-auto">
-        <DataTable
-            v-if="!errorMessage"
-            :value="tableData"
-            :paginator="true"
-            :rows="paginationMeta.per_page"
-            :totalRecords="paginationMeta.total"
-            :rowsPerPageOptions="[10, 15, 25, 50]"
-            :lazy="true"
-            :sortField="sortField"
-            :sortOrder="sortOrder"
-            @page="onPage"
-            @sort="onSort"
-            paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-            currentPageReportTemplate="{first} to {last} of {totalRecords}"
-            stripedRows
-            :loading="isLoading"
-            responsiveLayout="scroll"
-        >
-          <template #paginatorstart>
-            <Button @click="fetchRawData" type="button" icon="pi pi-refresh" text :title="t('common.refresh')" />
-          </template>
-          <template #paginatorend>
-            <Button @click="exportXLSX" type="button" icon="pi pi-download" text :title="t('common.download')" />
-          </template>
-
-          <Column
-              field="value"
-              sortable
-              :headerStyle="{ width: '33%' }"
-              :bodyStyle="{ textAlign: 'center' }"
-          >
-            <template #header>
-              <div style="width: 100%; text-align: center; font-weight: 600;">{{ t('sensor.value') }}</div>            </template>
-            <template #body="{ data }">
-              <span class="font-bold">{{ data.value }}</span>
-              <span class="text-gray-400 text-sm ml-1">{{ data.symbol }}</span>
-            </template>
-          </Column>
-
-          <Column
-              field="created_at"
-              sortable
-              :headerStyle="{ width: '33%' }"
-              :bodyStyle="{ textAlign: 'center' }"
-          >
-            <template #header>
-              <div style="width: 100%; text-align: center; font-weight: 600;">{{ t('sensor.recordedAt') }}</div>            </template>
-            <template #body="{ data }">
-              {{ formatDateTime(data.created_at) }}
-            </template>
-          </Column>
-
-          <Column
-              field="percentageChange"
-              :headerStyle="{ width: '33%' }"
-              :bodyStyle="{ textAlign: 'center' }"
-          >
-            <template #header>
-              <div style="width: 100%; text-align: center; font-weight: 600;">{{ t('sensor.percentageChange') }}</div>            </template>
-            <template #body="{ data }">
-              <span v-if="data.percentageChange !== null"
-                    :class="data.percentageChange > 0 ? 'text-green-400' :
-                         data.percentageChange != 0 ? 'text-red-400' : 'text-gray-500'"
-              >
-                {{ data.percentageChange > 0 ? '+' : '' }}{{ data.percentageChange }}%
-              </span>
-              <span v-else class="text-gray-500">–</span>
-            </template>
-          </Column>
-        </DataTable>
-
-        <AErrorMessage
-            v-else
-            :errorMessage="errorMessage"
+  <div :class="['overflow-x-auto rounded-lg border', isDarkMode ? 'bg-gray-800/70 border-gray-700/50' : 'border-gray-200/80']">
+    <DataTable
+        v-if="!errorMessage"
+        :value="tableData"
+        :paginator="true"
+        :rows="paginationMeta.per_page"
+        :totalRecords="paginationMeta.total"
+        :rowsPerPageOptions="[10, 15, 25, 50]"
+        :lazy="true"
+        :sortField="sortField"
+        :sortOrder="sortOrder"
+        @page="onPage"
+        @sort="onSort"
+        paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+        currentPageReportTemplate="{first} to {last} of {totalRecords}"
+        :loading="isLoading"
+        responsiveLayout="scroll"
+        :class="isDarkMode ? 'dark-table' : 'light-table'"
+    >
+      <template #paginatorstart>
+        <Button
+          @click="fetchRawData"
+          type="button"
+          icon="pi pi-refresh"
+          text
+          :title="t('common.refresh')"
+          :class="isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'"
         />
-      </div>
+      </template>
+      <template #paginatorend>
+        <Button
+          @click="exportXLSX"
+          type="button"
+          icon="pi pi-download"
+          text
+          :title="t('common.download')"
+          :class="isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'"
+        />
+      </template>
+
+      <Column
+          field="value"
+          sortable
+          :headerStyle="{ width: '33%' }"
+          :bodyStyle="{ textAlign: 'center' }"
+      >
+        <template #header>
+          <div
+            :class="['w-full text-center font-semibold']"
+          >
+            {{ t('sensor.value') }}
+          </div>
+        </template>
+        <template #body="{ data }">
+          <span :class="['font-bold', isDarkMode ? 'text-gray-300' : 'text-gray-700']">{{ data.value }}</span>
+          <span :class="isDarkMode ? 'text-gray-400' : 'text-gray-500'" class="text-sm ml-1">{{ data.symbol }}</span>
+        </template>
+      </Column>
+
+      <Column
+          field="created_at"
+          sortable
+          :headerStyle="{ width: '33%' }"
+          :bodyStyle="{ textAlign: 'center' }"
+      >
+        <template #header>
+          <div
+            :class="['w-full text-center font-semibold']"
+          >
+            {{ t('sensor.recordedAt') }}
+          </div>
+        </template>
+        <template #body="{ data }">
+          <span :class="isDarkMode ? 'text-gray-300' : 'text-gray-700'">
+            {{ formatDateTime(data.created_at) }}
+          </span>
+        </template>
+      </Column>
+
+      <Column
+          field="percentageChange"
+          :headerStyle="{ width: '33%' }"
+          :bodyStyle="{ textAlign: 'center' }"
+      >
+        <template #header>
+          <div
+            :class="['w-full text-center font-semibold']"
+          >
+            {{ t('sensor.percentageChange') }}
+          </div>
+        </template>
+        <template #body="{ data }">
+          <span v-if="data.percentageChange !== null"
+                :class="data.percentageChange > 0 ? 'text-green-400' :
+                     data.percentageChange != 0 ? 'text-red-400' : (isDarkMode ? 'text-gray-500' : 'text-gray-400')"
+          >
+            {{ data.percentageChange > 0 ? '+' : '' }}{{ data.percentageChange }}%
+          </span>
+          <span v-else :class="isDarkMode ? 'text-gray-500' : 'text-gray-400'">–</span>
+        </template>
+      </Column>
+    </DataTable>
+
+    <AErrorMessage
+        v-else
+        :errorMessage="errorMessage"
+    />
+  </div>
 </template>
 
 <style scoped>
+.dark-table :deep(.p-datatable-tbody > tr) {
+  background-color: rgba(31, 41, 55, 0.3);
+}
+
+.dark-table :deep(.p-datatable-tbody > tr:nth-child(even)) {
+  background-color: rgba(31, 41, 55, 0.5);
+}
+
+.light-table :deep(.p-datatable-tbody > tr) {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.light-table :deep(.p-paginator) {
+  background-color: rgba(243, 244, 246, 0.8);
+  border-top: 1px solid rgba(209, 213, 219, 0.5);
+}
 </style>

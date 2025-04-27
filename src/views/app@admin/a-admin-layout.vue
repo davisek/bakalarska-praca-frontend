@@ -74,10 +74,4 @@ onBeforeMount(() => {
 </template>
 
 <style scoped>
-.gradient-background {
-  background: rgb(17,24,39);
-  background: -moz-linear-gradient(138deg, rgba(17,24,39,1) 0%, rgba(21,26,47,1) 53%, rgba(29,30,60,1) 79%, rgba(38,35,76,1) 100%);
-  background: -webkit-linear-gradient(138deg, rgba(17,24,39,1) 0%, rgba(21,26,47,1) 53%, rgba(29,30,60,1) 79%, rgba(38,35,76,1) 100%);
-  background: linear-gradient(138deg, rgba(17,24,39,1) 0%, rgba(21,26,47,1) 53%, rgba(29,30,60,1) 79%, rgba(38,35,76,1) 100%);
-}
 </style>

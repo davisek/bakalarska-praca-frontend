@@ -8,8 +8,11 @@ import { PaginatedResponse, PaginationMeta, User } from "@/types";
 import { formatDateTime } from "@/utils/dateUtil";
 import { showSuccess, showError } from '@/utils/notificationUtil';
 import { useI18n } from 'vue-i18n';
+import { useTheme } from '@/utils/themeUtil';
 
 const { t } = useI18n();
+const isDarkMode = useTheme();
+
 const users = ref<User[]>([]);
 const errorMessage = ref<string | null>(null);
 const isLoading = ref(true);
@@ -123,7 +126,7 @@ onMounted(() => {
 
 <template>
   <div class="lg:p-6 p-2">
-    <ABreadcrumb />
+    <ABreadcrumb class="lg:pl-4 lg:pt-4" />
     <ALoadingScreen :is-loading="isLoading" />
 
     <div class="p-4 bg-gray-800/90 rounded-lg shadow-lg border border-gray-700/50 m-6">
@@ -144,7 +147,7 @@ onMounted(() => {
         </div>
       </div>
 
-      <div class="overflow-x-auto">
+      <div :class="['overflow-x-auto rounded-lg border', isDarkMode ? 'bg-gray-800/70 border-gray-700/50' : ' border-gray-200/80']">
         <DataTable
             :value="users"
             :paginator="true"
@@ -158,29 +161,48 @@ onMounted(() => {
             @sort="onSort"
             paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
             currentPageReportTemplate="{first} to {last} of {totalRecords}"
-            stripedRows
-            :loading="isLoading"
+s            :loading="isLoading"
             responsiveLayout="scroll"
+            :class="isDarkMode ? 'dark-table' : 'light-table'"
         >
-          <template #paginatorstart>
-            <Button @click="fetchUsers" type="button" icon="pi pi-refresh" text />
-          </template>
+        <template #paginatorstart>
+          <Button
+            @click="fetchUsers"
+            type="button"
+            icon="pi pi-refresh"
+            text
+            :title="t('common.refresh')"
+            :class="isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'"
+          />
+        </template>
 
-          <Column field="name" :header="t('admin.users.name')" sortable />
+          <Column field="name" :header="t('admin.users.name')" sortable>
+            <template #body="{ data }">
+              <span :class="[isDarkMode ? 'text-gray-300' : 'text-gray-700']">{{ data.name }}</span>
+            </template>
+          </Column>
 
-          <Column field="surname" :header="t('admin.users.surname')" sortable />
+          <Column field="surname" :header="t('admin.users.surname')" sortable>
+            <template #body="{ data }">
+              <span :class="[isDarkMode ? 'text-gray-300' : 'text-gray-700']">{{ data.surname }}</span>
+            </template>
+          </Column>
 
-          <Column field="email" :header="t('admin.users.email')" sortable />
+          <Column field="email" :header="t('admin.users.email')" sortable>
+            <template #body="{ data }">
+              <span :class="[isDarkMode ? 'text-gray-300' : 'text-gray-700']">{{ data.email }}</span>
+            </template>
+          </Column>
 
           <Column field="email_verified_at" :header="t('admin.users.emailVerified')" sortable>
             <template #body="{ data }">
               <div v-if="data.email_verified_at" class="flex items-center">
                 <i class="pi pi-check-circle text-green-500 mr-2"></i>
-                {{ formatDateTime(data.email_verified_at) }}
+                <span :class="[isDarkMode ? 'text-gray-300' : 'text-gray-700']">{{ formatDateTime(data.email_verified_at) }}</span>
               </div>
               <div v-else class="flex items-center">
                 <i class="pi pi-times-circle text-red-400 mr-2"></i>
-                <span class="text-gray-400">{{ t('admin.users.notVerified') }}</span>
+                <span :class="[isDarkMode ? 'text-gray-300' : 'text-gray-700']">{{ t('admin.users.notVerified') }}</span>
               </div>
             </template>
           </Column>
@@ -189,21 +211,21 @@ onMounted(() => {
             <template #body="{ data }">
               <div class="flex items-center gap-2">
                 <img v-if="data.locale.symbol" :src="data.locale.symbol" class="w-5 h-5" alt="Locale flag" />
-                {{ data.locale.label }}
+                <span :class="[isDarkMode ? 'text-gray-300' : 'text-gray-700']">{{ data.locale.label }}</span>
               </div>
             </template>
           </Column>
 
           <Column field="is_admin" :header="t('admin.users.admin')" sortable>
             <template #body="{ data }">
-              <Tag v-if="data.is_admin" severity="success" :value="t('admin.users.admin')" />
+              <Tag v-if="data.is_admin" severity="warn" :value="t('admin.users.admin')" />
               <Tag v-else severity="info" :value="t('admin.users.user')" />
             </template>
           </Column>
 
           <Column field="created_at" :header="t('admin.users.createdAt')" sortable>
             <template #body="{ data }">
-              {{ formatDateTime(data.created_at) }}
+              <span :class="[isDarkMode ? 'text-gray-300' : 'text-gray-700']">{{ formatDateTime(data.created_at) }}</span>
             </template>
           </Column>
 
@@ -269,4 +291,20 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.dark-table :deep(.p-datatable-tbody > tr) {
+  background-color: rgba(31, 41, 55, 0.3);
+}
+
+.dark-table :deep(.p-datatable-tbody > tr:nth-child(even)) {
+  background-color: rgba(31, 41, 55, 0.5);
+}
+
+.light-table :deep(.p-datatable-tbody > tr) {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.light-table :deep(.p-paginator) {
+  background-color: rgba(243, 244, 246, 0.8);
+  border-top: 1px solid rgba(209, 213, 219, 0.5);
+}
 </style>

@@ -69,6 +69,10 @@ const fetchGroups = async () => {
   }
 };
 
+const goToAdminPanel = () => {
+  router.push('/admin');
+};
+
 onMounted(() => {
   fetchGroups();
 });
@@ -133,13 +137,12 @@ onMounted(() => {
         <span class="nav-text">{{ t('nav.statistics') }}</span>
       </router-link>
     </div>
-
   </div>
 </template>
 
 <style scoped>
 .navbar-container {
-  @apply flex flex-col h-full w-full bg-gray-800 text-gray-300 py-6;
+  @apply flex flex-col h-full w-full bg-gray-800 text-gray-300 pt-6;
   background-image: linear-gradient(180deg, #1a202c, #1e293b);
   border-right: 1px solid rgba(75, 85, 99, 0.2);
 }

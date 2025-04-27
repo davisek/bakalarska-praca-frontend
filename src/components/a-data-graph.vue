@@ -8,10 +8,12 @@ import {formatDateTime} from "@/utils/dateUtil";
 import { Sensor, SensorReading, SensorStatistics, ChartOptions, ChartContext } from '@/types';
 import AErrorMessage from "@/components/a-error-message.vue";
 import { useI18n } from 'vue-i18n';
+import { useTheme } from '@/utils/themeUtil'
 
 ChartJS.register(CrosshairPlugin, Title, Tooltip, Legend, LineElement, PointElement, LinearScale, CategoryScale);
 
 const { t } = useI18n();
+const isDarkMode = useTheme();
 
 const props = defineProps({
   sensor: {
@@ -46,8 +48,6 @@ const chartOptions = ref<ChartOptions>({});
 const errorMessage = ref<string | null>(null);
 const isLoading = ref(true);
 const chartContainerRef = ref<HTMLElement | null>(null);
-
-const isDarkMode = ref(localStorage.getItem('user')?.includes('dark_mode":true') || true);
 
 const toggleFullscreen = () => {
   if (!chartContainerRef.value) return;
@@ -136,8 +136,11 @@ const loadChartData = async () => {
             enabled: true,
             callbacks: {
               label: function (context: ChartContext) {
-                const value = context.raw || '';
-                return `${value} ${symbol.value}`;
+                const value = context.raw;
+                if (value === 0 || value) {
+                  return `${value} ${symbol.value}`;
+                }
+                return 'No data';
               }
             },
             backgroundColor: isDarkMode.value ? 'rgba(17, 24, 39, 0.9)' : 'rgba(255, 255, 255, 0.9)',
@@ -245,9 +248,10 @@ onUnmounted(() => {
       <div>
         <h2 :class="['chart-title', isDarkMode ? 'text-white' : 'text-gray-900']">{{ t('sensor.readings', { name: props.sensor.display_name }) }}</h2>
         <button
-            @click="toggleFullscreen"
-            class="expand-button mr-4"
-            :title="t('common.toggleFullscreen')"
+          @click="toggleFullscreen"
+          class="expand-button mr-4"
+          :class="isDarkMode ? 'text-gray-200' : 'text-gray-800'"
+          :title="t('common.toggleFullscreen')"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 ml-1 mt-1">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
@@ -289,7 +293,7 @@ onUnmounted(() => {
           </svg>
         </div>
         <div>
-          <h5 :class="['stat-label', isDarkMode ? 'text-gray-400' : 'text-gray-600']">{{ t('sensor.minimumValue') }}</h5>
+          <h5 :class="['stat-label', isDarkMode ? 'text-gray-400' : 'text-gray-900']">{{ t('sensor.minimumValue') }}</h5>
           <div :class="['stat-value', isDarkMode ? 'text-white' : 'text-gray-900']">{{ statistics.min }} <span :class="['stat-unit', isDarkMode ? 'text-gray-400' : 'text-gray-600']">{{ symbol }}</span></div>
         </div>
       </div>

@@ -32,6 +32,9 @@ function openSettings() {
   emit('open-settings');
   closeMenu();
 }
+const goToAdminPanel = () => {
+  router.push('/admin');
+};
 
 function isActive(path: string) {
   return route.path.includes(path);

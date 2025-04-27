@@ -6,8 +6,11 @@ import AErrorMessage from '@/components/a-error-message.vue';
 import {PaginatedResponse, PaginationMeta, Log, User} from "@/types";
 import { formatDateTime } from "@/utils/dateUtil.ts";
 import { useI18n } from 'vue-i18n';
+import { useTheme } from '@/utils/themeUtil';
 
 const { t } = useI18n();
+const isDarkMode = useTheme();
+
 const logs = ref<Log[]>([])
 const errorMessage = ref<string | null>(null);
 const isLoading = ref(true);
@@ -103,7 +106,7 @@ onMounted(() => {
       </div>
     </div>
 
-    <div class="overflow-x-auto">
+    <div :class="['overflow-x-auto rounded-lg border', isDarkMode ? 'bg-gray-800/70 border-gray-700/50' : ' border-gray-200/80']">
       <DataTable
           :value="logs"
           :paginator="true"
@@ -117,19 +120,30 @@ onMounted(() => {
           @sort="onSort"
           paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
           currentPageReportTemplate="{first} to {last} of {totalRecords}"
-          stripedRows
           :loading="isLoading"
           responsiveLayout="scroll"
+          :class="isDarkMode ? 'dark-table' : 'light-table'"
       >
         <template #paginatorstart>
-          <Button @click="fetchLogs" type="button" icon="pi pi-refresh" text />
+          <Button
+            @click="fetchLogs"
+            type="button"
+            icon="pi pi-refresh"
+            text
+            :title="t('common.refresh')"
+            :class="isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'"
+          />
         </template>
 
         <Column
             field="message"
             :header="t('admin.logs.message')"
             :headerStyle="{ width: '70%' }"
-        ></Column>
+        >
+        <template #body="{ data }">
+          <span :class="[isDarkMode ? 'text-gray-300' : 'text-gray-700']">{{ data.message }}</span>
+        </template>
+        </Column>
 
         <Column
             field="created_at"
@@ -138,7 +152,9 @@ onMounted(() => {
             :headerStyle="{ width: '30%' }"
         >
           <template #body="{ data }">
+            <span :class="isDarkMode ? 'text-gray-300' : 'text-gray-700'">
             {{ formatDateTime(data.created_at) }}
+          </span>
           </template>
         </Column>
       </DataTable>
@@ -149,5 +165,20 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.dark-table :deep(.p-datatable-tbody > tr) {
+  background-color: rgba(31, 41, 55, 0.3);
+}
 
+.dark-table :deep(.p-datatable-tbody > tr:nth-child(even)) {
+  background-color: rgba(31, 41, 55, 0.5);
+}
+
+.light-table :deep(.p-datatable-tbody > tr) {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.light-table :deep(.p-paginator) {
+  background-color: rgba(243, 244, 246, 0.8);
+  border-top: 1px solid rgba(209, 213, 219, 0.5);
+}
 </style>

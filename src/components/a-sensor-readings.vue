@@ -6,14 +6,11 @@ import {formatDateTime} from "@/utils/dateUtil.ts";
 import {Sensor, CurrentSensorData, MqttSensorPayload} from '@/types';
 import ALoadingScreen from "@/components/a-loading-screen.vue";
 import { useI18n } from 'vue-i18n';
+import { useTheme } from '@/utils/themeUtil'
 
 const { t } = useI18n();
-const props = defineProps({
-  sensor: {
-    type: Object as () => Sensor,
-    required: true,
-  },
-});
+const props = defineProps<{ sensor: Sensor }>()
+const isDarkMode = useTheme();
 
 const sensorData = reactive<CurrentSensorData>({
   value: null,
@@ -42,8 +39,9 @@ const fetchSensorData = async () => {
 const handleMQTTMessage = (topic: string, message: Buffer) => {
   const payload = JSON.parse(message.toString()) as MqttSensorPayload;
   if (topic === `${props.sensor.type}-data`) {
-    sensorData.value = payload.value;
-    sensorData.created_at = payload.created_at;
+    sensorData.value      = payload.value;
+    sensorData.created_at = new Date().toISOString();
+    sensorData.symbol = props.sensor.unit_of_measurement;
   }
 };
 
@@ -81,9 +79,11 @@ onUnmounted(() => {
 
     <div class="lg:flex flex-none justify-center lg:ml-2 ml-0">
       <div class="w-full lg:w-5/6">
-        <h3 class="text-md font-bold mb-2 text-gray-500">{{ t('sensor.liveDataTitle', { name: props.sensor.display_name }) }}</h3>
-        <p class="value-number text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300 shadow-sm"><span class="font-bold">{{ sensorData.value }} {{ sensorData.symbol }}</span></p>
-        <p class="text-md">  <span>{{ t('sensor.recordedAt') }}:</span> <span class="font-bold" v-if="sensorData.created_at">{{ formatDateTime(sensorData.created_at) }}</span>
+        <h3 :class="['text-md font-bold mb-2', isDarkMode ? 'text-gray-500' : 'text-gray-600']">
+          {{ t('sensor.liveDataTitle', { name: props.sensor.display_name }) }}
+        </h3>
+        <p :class="['value-number text-xl font-bold bg-clip-text shadow-sm', isDarkMode ? 'dark-text-gradient-color' : 'light-text-gradient-color']"><span class="font-bold">{{ sensorData.value }} {{ sensorData.symbol || props.sensor.unit_of_measurement }}</span></p>
+        <p :class="['text-md', isDarkMode ? 'text-white' : 'text-gray-700']">  <span>{{ t('sensor.recordedAt') }}:</span> <span class="font-bold" v-if="sensorData.created_at">{{ formatDateTime(sensorData.created_at) }}</span>
           <span v-else>{{ t('common.noDataFound') }}</span>
         </p>
       </div>

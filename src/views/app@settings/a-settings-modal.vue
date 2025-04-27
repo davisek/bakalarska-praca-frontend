@@ -3,8 +3,10 @@ import { ref, watch } from 'vue';
 import AProfileSettings from './a-profile-settings.vue';
 import ANotificationSettings from './a-notification-settings.vue';
 import { useI18n } from 'vue-i18n';
+import { useTheme } from '@/utils/themeUtil';
 
 const { t } = useI18n();
+const isDarkMode = useTheme();
 
 const props = defineProps({
   isOpen: {
@@ -39,7 +41,7 @@ const closeModal = () => {
 
     <div class="flex items-center justify-center min-h-screen p-4">
       <div
-          class="relative w-full max-w-4xl gradient-background text-white rounded-xl shadow-lg overflow-hidden"
+          :class="['relative w-full max-w-4xl text-white rounded-xl shadow-lg overflow-hidden', isDarkMode ? 'dark-gradient-background' : 'light-gradient-background']"
           @click.stop
       >
         <div class="border-b border-gray-700">
@@ -91,8 +93,19 @@ const closeModal = () => {
 </template>
 
 <style scoped>
-.gradient-background {
-  background-image: linear-gradient(to bottom right, rgba(30, 41, 59, 0.98), rgba(17, 24, 39, 0.98));
+.dark-gradient-background {
+  background: rgba(30, 41, 59, 0.98);
+  background: -moz-linear-gradient(315deg,rgba(30, 41, 59, 0.98) 0%,rgba(17, 24, 39, 0.98) 100%);
+  background: -webkit-linear-gradient(315deg,rgba(30, 41, 59, 0.98) 0%,rgba(17, 24, 39, 0.98) 100%);
+  background: linear-gradient(to bottom right,rgba(30, 41, 59, 0.98),rgba(17, 24, 39, 0.98));
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+}
+
+.light-gradient-background {
+  background: rgba(77, 86, 98, 0.9);
+  background: -moz-linear-gradient(315deg,rgba(77, 86, 98, 0.9) 0%,rgba(47, 55, 66, 0.9) 100%);
+  background: -webkit-linear-gradient(315deg,rgba(77, 86, 98, 0.9) 0%,rgba(47, 55, 66, 0.9) 100%);
+  background: linear-gradient(to bottom right,rgba(77, 86, 98, 0.9),rgba(47, 55, 66, 0.9));
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
 }
 </style>

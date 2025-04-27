@@ -44,7 +44,7 @@ const currentUser = computed(() => {
 
 
 <template>
-  <div class="admin-navbar h-full flex flex-col">
+  <div class="admin-navbar flex flex-col lg:h-screen">
     <div class="border-b border-gray-700 p-6">
       <div class="flex items-center mb-4">
         <div class="shadow-lg p-2 rounded-lg bg-gradient-to-br from-purple-600 to-indigo-600 mr-3">
@@ -94,6 +94,7 @@ const currentUser = computed(() => {
         <span>{{ t('admin.nav.backToApp') }}</span>
       </button>
     </div>
+
   </div>
 </template>
 

@@ -37,10 +37,10 @@ body {
 
 .light-theme .gradient-background {
   background: rgb(255,255,255);
-  background: -moz-linear-gradient(138deg, rgba(255,255,255,1) 0%, rgba(243,244,246,1) 53%, rgba(229,231,235,1) 79%, rgba(209,213,219,1) 100%);
-  background: -webkit-linear-gradient(138deg, rgba(255,255,255,1) 0%, rgba(243,244,246,1) 53%, rgba(229,231,235,1) 79%, rgba(209,213,219,1) 100%);
-  background: linear-gradient(138deg, rgba(255,255,255,1) 0%, rgba(243,244,246,1) 53%, rgba(229,231,235,1) 79%, rgba(209,213,219,1) 100%);
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#ffffff",endColorstr="#d1d5db",GradientType=1);
+  background: -moz-linear-gradient(138deg, rgba(255,255,255,1) 0%, rgba(243,244,246,1) 40%, rgba(216,216,235,1) 70%, rgba(195,194,220,1) 100%);
+  background: -webkit-linear-gradient(138deg, rgba(255,255,255,1) 0%, rgba(243,244,246,1) 40%, rgba(216,216,235,1) 70%, rgba(195,194,220,1) 100%);
+  background: linear-gradient(138deg, rgba(255,255,255,1) 0%, rgba(243,244,246,1) 40%, rgba(216,216,235,1) 70%, rgba(195,194,220,1) 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#ffffff",endColorstr="#c3c2dc",GradientType=1);
 }
 
 .shadow-box {
@@ -71,24 +71,10 @@ body {
   transition: background-color 0.3s, color 0.3s, border-color 0.3s;
 }
 
-.light-theme h1,
-.light-theme h2,
-.light-theme h3,
-.light-theme h4,
-.light-theme h5,
-.light-theme h6 {
-  color: var(--surface-900);
+.dark-text-gradient-color {
+  @apply text-transparent bg-gradient-to-r from-purple-300 to-blue-300
 }
 
-
-.light-theme .nav-links .nav-item {
-  color: var(--surface-700);
-}
-
-.light-theme .card,
-.light-theme .sensor-card,
-.light-theme .sensor-content {
-  border-color: rgba(0, 0, 0, 0.1);
-  background: rgba(255, 255, 255, 0.8);
-  color: var(--surface-900);
+.light-text-gradient-color {
+  @apply text-transparent bg-gradient-to-r from-purple-500 to-blue-500
 }
