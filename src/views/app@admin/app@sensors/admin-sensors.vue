@@ -5,6 +5,7 @@ import axiosInstance from "@/plugins/axios";
 import { showSuccess, showError } from "@/utils/notificationUtil";
 import {SensorGroup, Sensor, Enum} from '@/types';
 import ALoadingScreen from "@/components/a-loading-screen.vue";
+import AAdminSensorsTutorial from "@/views/app@admin/app@sensors/a-admin-sensors-tutorial.vue";
 import FileUpload from 'primevue/fileupload';
 import { useI18n } from 'vue-i18n';
 import { useTheme } from '@/utils/themeUtil';
@@ -20,6 +21,7 @@ const expandedGroups = ref<Set<string>>(new Set());
 const src = ref(null);
 const src_img = ref(null);
 
+const tutorialDialog = ref(false);
 const groupDialog = ref(false);
 const sensorDialog = ref(false);
 const deleteGroupDialog = ref(false);
@@ -27,6 +29,18 @@ const deleteSensorDialog = ref(false);
 
 const selectedGroup = ref<SensorGroup | null>(null);
 const selectedSensor = ref<Sensor | null>(null);
+
+const groupNameError = ref('');
+const groupValueError = ref('');
+const groupImageError = ref('');
+
+const sensorNameError = ref('');
+const sensorTypeError = ref('');
+const sensorDisplayNameError = ref('');
+const sensorUnitError = ref('');
+const sensorCssClassError = ref('');
+const sensorImageError = ref('');
+const sensorIconError = ref('');
 
 const groupForm = ref({
   id: null,
@@ -105,7 +119,14 @@ const openGroupDialog = (group: SensorGroup | null = null) => {
     };
   }
 
+  groupNameError.value = '';
+  groupValueError.value = '';
+  groupImageError.value = '';
   groupDialog.value = true;
+};
+
+const openTutorialDialog = () => {
+  tutorialDialog.value = true;
 };
 
 const openSensorDialog = (sensor: Sensor | null = null, groupId: any = null) => {
@@ -145,12 +166,20 @@ const openSensorDialog = (sensor: Sensor | null = null, groupId: any = null) => 
     };
   }
 
+  sensorNameError.value = '';
+  sensorTypeError.value = '';
+  sensorDisplayNameError.value = '';
+  sensorUnitError.value = '';
+  sensorCssClassError.value = '';
+  sensorImageError.value = '';
+  sensorIconError.value = '';
   sensorDialog.value = true;
 };
 
 const handleGroupImageUpload = (event) => {
   if (event.files) {
     groupForm.value.image = event.files[0];
+    groupImageError.value = ''
     const reader = new FileReader();
     reader.onload = (e) => src.value = e.target?.result;
     reader.readAsDataURL(event.files[0]);
@@ -158,8 +187,9 @@ const handleGroupImageUpload = (event) => {
 };
 
 const handleSensorImageUpload = (event) => {
-  if (event.files && event.files.length > 0) {
+  if (event.files) {
     sensorForm.value.image = event.files[0];
+    sensorImageError.value = ''
     const reader = new FileReader();
     reader.onload = (e) => src_img.value = e.target?.result;
     reader.readAsDataURL(event.files[0]);
@@ -167,8 +197,9 @@ const handleSensorImageUpload = (event) => {
 };
 
 const handleSensorIconUpload = (event) => {
-  if (event.files && event.files.length > 0) {
+  if (event.files) {
     sensorForm.value.icon = event.files[0];
+    sensorIconError.value = ''
     const reader = new FileReader();
     reader.onload = (e) => src.value = e.target?.result;
     reader.readAsDataURL(event.files[0]);
@@ -177,9 +208,8 @@ const handleSensorIconUpload = (event) => {
 
 const saveGroup = async () => {
   try {
-    if (!groupForm.value.group_name || !groupForm.value.group_value) {
-      showError(t('admin.sensors.groupNameValueRequired'));
-      return;
+    if (!validateGroupName() || !validateGroupValue() || !validateGroupImage()) {
+      return
     }
 
     const formData = new FormData();
@@ -214,17 +244,33 @@ const saveGroup = async () => {
     } else {
       showError(response.message);
     }
-  } catch (error) {
-    showError(t('admin.sensors.failedToSaveGroup'));
+  } catch (err: any) {
+    if (err.response?.data?.errors) {
+      const errors = err.response.data.errors
+      if (errors.group_name) groupNameError.value = errors.group_name[0]
+      if (errors.group_value) groupValueError.value = errors.group_value[0]
+      if (errors.image) groupImageError.value = errors.image[0]
+    } else {
+      showError(t('admin.sensors.failedToSaveGroup'))
+    }
+  } finally {
+    isLoading.value = false
   }
 };
 
 const saveSensor = async () => {
   try {
-    if (!sensorForm.value.sensor_name || !sensorForm.value.type || !sensorForm.value.display_name) {
-      showError(t('admin.sensors.sensorFieldsRequired'));
-      return;
+    if (
+      !validateSensorName() ||
+      !validateSensorType() ||
+      !validateSensorDisplayName() ||
+      !validateSensorCssClass() ||
+      !validateSensorImage() ||
+      !validateSensorIcon()
+    ) {
+      return
     }
+
     const formData = new FormData();
     formData.append('sensor_name', sensorForm.value.sensor_name);
     formData.append('type', sensorForm.value.type);
@@ -273,8 +319,21 @@ const saveSensor = async () => {
     } else {
       showError(response.message);
     }
-  } catch (error) {
-    showError(t('admin.sensors.failedToSaveSensor'));
+  } catch (err: any) {
+    if (err.response?.data?.errors) {
+      const errors = err.response.data.errors
+      if (errors.sensor_name) sensorNameError.value = errors.sensor_name[0]
+      if (errors.type) sensorTypeError.value = errors.type[0]
+      if (errors.display_name) sensorDisplayNameError.value = errors.display_name[0]
+      if (errors.unit_of_measurement) sensorUnitError.value = errors.unit_of_measurement[0]
+      if (errors.color_class) sensorCssClassError.value = errors.color_class[0]
+      if (errors.image) sensorImageError.value = errors.image[0]
+      if (errors.icon) sensorIconError.value = errors.icon[0]
+    } else {
+      showError(t('admin.sensors.failedToSaveSensor'))
+    }
+  } finally {
+    isLoading.value = false
   }
 };
 
@@ -322,6 +381,84 @@ const deleteSensor = async () => {
   }
 };
 
+function validateGroupName() {
+  if (!groupForm.value.group_name) {
+    groupNameError.value = t('admin.sensors.groupNameValueRequired')
+    return false
+  }
+  groupNameError.value = ''
+  return true
+}
+function validateGroupValue() {
+  if (!groupForm.value.group_value) {
+    groupValueError.value = t('admin.sensors.groupNameValueRequired')
+    return false
+  }
+  groupValueError.value = ''
+  return true
+}
+
+function validateSensorName() {
+  if (!sensorForm.value.sensor_name) {
+    sensorNameError.value = t('admin.sensors.sensorNameRequired')
+    return false
+  }
+  sensorNameError.value = ''
+  return true
+}
+function validateSensorType() {
+  if (!sensorForm.value.type) {
+    sensorTypeError.value = t('admin.sensors.sensorTypeRequired')
+    return false
+  }
+  sensorTypeError.value = ''
+  return true
+}
+function validateSensorDisplayName() {
+  if (!sensorForm.value.display_name) {
+    sensorDisplayNameError.value = t('admin.sensors.sensorDisplayNameRequired')
+    return false
+  }
+  sensorDisplayNameError.value = ''
+  return true
+}
+
+function validateSensorCssClass() {
+  if (!sensorForm.value.color_class) {
+    sensorCssClassError.value = t('admin.sensors.cssClassRequired')
+    return false
+  }
+  sensorCssClassError.value = ''
+  return true
+}
+
+function validateGroupImage() {
+  if (!groupForm.value.image && !groupForm.value.image_path) {
+    groupImageError.value = t('admin.sensors.groupImageRequired')
+    return false
+  }
+  groupImageError.value = ''
+  return true
+}
+
+function validateSensorImage() {
+  if (!sensorForm.value.image && !sensorForm.value.image_path) {
+    sensorImageError.value = t('admin.sensors.sensorImageRequired')
+    return false
+  }
+  sensorImageError.value = ''
+  return true
+}
+
+function validateSensorIcon() {
+  if (!sensorForm.value.icon && !sensorForm.value.icon_path) {
+    sensorIconError.value = t('admin.sensors.sensorIconRequired')
+    return false
+  }
+  sensorIconError.value = ''
+  return true
+}
+
 onMounted(() => {
   loadGroups();
   loadColorClasses();
@@ -334,6 +471,13 @@ onMounted(() => {
     <div class="p-6">
       <div class="mb-4 flex justify-between items-center">
         <h1 :class="['text-2xl font-bold', isDarkMode ? 'text-white' : 'text-black']">{{ t('admin.sensors.title') }}</h1>
+        <Button
+            :label="t('admin.sensors.tutorial')"
+            icon="pi pi-question-circle"
+            severity="info"
+            @click="openTutorialDialog()"
+            class="mr-2"
+        />
         <Button
             :label="t('admin.sensors.addGroup')"
             icon="pi pi-plus"
@@ -480,13 +624,29 @@ onMounted(() => {
         <div class="p-4 space-y-4">
           <div class="field">
             <label for="groupName" class="block mb-2 text-gray-300">{{ t('admin.sensors.groupName') }}</label>
-            <InputText id="groupName" v-model="groupForm.group_name" required class="w-full" />
+            <InputText id="groupName" v-model="groupForm.group_name" required class="w-full" :invalid="!!groupNameError"/>
+            <Message
+              v-if="groupNameError"
+              severity="error"
+              size="small"
+              variant="simple"
+            >
+              {{ groupNameError }}
+            </Message>
           </div>
 
           <div class="field">
             <label for="groupValue" class="block mb-2 text-gray-300">{{ t('admin.sensors.groupValue') }}</label>
-            <InputText id="groupValue" v-model="groupForm.group_value" required class="w-full"
+            <InputText id="groupValue" v-model="groupForm.group_value" required class="w-full" :invalid="!!groupValueError"
                       :placeholder="t('admin.sensors.groupValuePlaceholder')" />
+            <Message
+              v-if="groupValueError"
+              severity="error"
+              size="small"
+              variant="simple"
+            >
+              {{ groupValueError }}
+            </Message>
             <small v-if="!selectedGroup" class="text-gray-400">{{ t('admin.sensors.createFirstGroup') }}</small>
           </div>
 
@@ -506,7 +666,16 @@ onMounted(() => {
                 :chooseLabel="t('admin.sensors.browse')"
                 class="w-full"
                 @select="handleGroupImageUpload"
+                :invalid="!!groupImageError"
             />
+            <Message
+              v-if="groupImageError"
+              severity="error"
+              size="small"
+              variant="simple"
+            >
+              {{ groupImageError }}
+            </Message>
             <small class="text-gray-400">{{ t('admin.sensors.maxSizeInfo') }}</small>
             <img v-if="src" :src="src" alt="Image" class="shadow-md rounded-xl w-full sm:w-64" style="filter: grayscale(100%)" />
           </div>
@@ -528,25 +697,57 @@ onMounted(() => {
         <div class="p-4 space-y-4">
           <div class="field">
             <label for="sensorName" class="block mb-2 text-gray-300">{{ t('admin.sensors.sensorName') }}</label>
-            <InputText id="sensorName" v-model="sensorForm.sensor_name" required autofocus class="w-full" />
+            <InputText id="sensorName" v-model="sensorForm.sensor_name" required autofocus class="w-full" :invalid="!!sensorNameError" />
+            <Message
+              v-if="sensorNameError"
+              severity="error"
+              size="small"
+              variant="simple"
+            >
+              {{ sensorNameError }}
+            </Message>
           </div>
 
           <div class="field">
             <label for="sensorType" class="block mb-2 text-gray-300">{{ t('admin.sensors.sensorType') }}</label>
-            <InputText id="sensorType" v-model="sensorForm.type" required class="w-full"
+            <InputText id="sensorType" v-model="sensorForm.type" required class="w-full" :invalid="!!sensorTypeError"
                       :placeholder="t('admin.sensors.sensorTypePlaceholder')" />
+            <Message
+              v-if="sensorTypeError"
+              severity="error"
+              size="small"
+              variant="simple"
+            >
+              {{ sensorTypeError }}
+            </Message>
             <small v-if="!selectedSensor" class="text-gray-400">{{ t('admin.sensors.sensorTypeHelper') }}</small>
           </div>
 
           <div class="field">
             <label for="displayName" class="block mb-2 text-gray-300">{{ t('admin.sensors.displayName') }}</label>
-            <InputText id="displayName" v-model="sensorForm.display_name" required class="w-full" />
+            <InputText id="displayName" v-model="sensorForm.display_name" required class="w-full" :invalid="!!sensorDisplayNameError" />
+            <Message
+              v-if="sensorDisplayNameError"
+              severity="error"
+              size="small"
+              variant="simple"
+            >
+              {{ sensorDisplayNameError }}
+            </Message>
           </div>
 
           <div class="field">
             <label for="unitOfMeasurement" class="block mb-2 text-gray-300">{{ t('admin.sensors.unitOfMeasurement') }}</label>
-            <InputText id="unitOfMeasurement" v-model="sensorForm.unit_of_measurement" required class="w-full"
+            <InputText id="unitOfMeasurement" v-model="sensorForm.unit_of_measurement" required class="w-full" :invalid="!!sensorUnitError"
                       :placeholder="t('admin.sensors.unitOfMeasurementPlaceholder')" />
+            <Message
+              v-if="sensorUnitError"
+              severity="error"
+              size="small"
+              variant="simple"
+            >
+              {{ sensorUnitError }}
+            </Message>
           </div>
 
           <div class="field">
@@ -568,7 +769,16 @@ onMounted(() => {
               checkmark
               :highlightOnSelect="false"
               class="w-full"
+              :invalid="!!sensorCssClassError"
             />
+            <Message
+              v-if="sensorCssClassError"
+              severity="error"
+              size="small"
+              variant="simple"
+            >
+              {{ sensorCssClassError }}
+            </Message>
             <small class="text-gray-400">{{ t('admin.sensors.cssClassInfo') }}</small>
           </div>
 
@@ -589,7 +799,16 @@ onMounted(() => {
                 :chooseLabel="t('admin.sensors.browse')"
                 class="w-full"
                 @select="handleSensorIconUpload"
+                :invalid="!!sensorIconError"
               />
+              <Message
+                v-if="sensorIconError"
+                severity="error"
+                size="small"
+                variant="simple"
+              >
+                {{ sensorIconError }}
+              </Message>
               <small class="text-gray-400">{{ t('admin.sensors.maxSizeInfo') }}</small>
               <img v-if="src" :src="src" alt="Image" class="shadow-md rounded-xl w-full sm:w-64" style="filter: grayscale(100%)" />
             </div>
@@ -610,7 +829,16 @@ onMounted(() => {
                 :chooseLabel="t('admin.sensors.browse')"
                 class="w-full"
                 @select="handleSensorImageUpload"
+                :invalid="!!sensorImageError"
               />
+              <Message
+                v-if="sensorImageError"
+                severity="error"
+                size="small"
+                variant="simple"
+              >
+                {{ sensorImageError }}
+              </Message>
               <small class="text-gray-400">{{ t('admin.sensors.maxSizeInfo') }}</small>
               <img v-if="src_img" :src="src_img" alt="Image" class="shadow-md rounded-xl w-full sm:w-64" style="filter: grayscale(100%)" />
             </div>
@@ -665,6 +893,15 @@ onMounted(() => {
           <Button :label="t('admin.sensors.no')" icon="pi pi-times" text @click="deleteSensorDialog = false" />
           <Button :label="t('admin.sensors.yesDelete')" icon="pi pi-trash" severity="danger" @click="deleteSensor" />
         </template>
+      </Dialog>
+
+      <Dialog
+        v-model:visible="tutorialDialog"
+        :header="t('admin.sensors.tutorial')"
+        :modal="true"
+        :style="{ width: '80vw', maxWidth: '95vw' }"
+      >
+        <AAdminSensorsTutorial />
       </Dialog>
     </div>
   </div>

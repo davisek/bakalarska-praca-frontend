@@ -283,13 +283,39 @@
       "failedToLoadColorClasses": "Failed to load color classes",
       "failedToSaveGroup": "Failed to save sensor group",
       "failedToSaveSensor": "Failed to save sensor",
-      "sensorFieldsRequired": "Sensor name, type, and display name are required",
+      "sensorNameRequired": "Sensor name is required.",
+      "sensorTypeRequired": "Sensor type is required.",
+      "sensorDisplayNameRequired": "Display name is required.",
+      "cssClassRequired": "A CSS class must be selected.",
       "groupNameValueRequired": "Group name and value are required",
       "groupImageRequired": "Group image is required",
       "sensorImageRequired": "Sensor image is required",
       "sensorIconRequired": "Sensor icon is required",
       "failedToDeleteGroup": "Failed to delete sensor group",
-      "failedToDeleteSensor": "Failed to delete sensor"
+      "failedToDeleteSensor": "Failed to delete sensor",
+      "tutorial": "Tutorial",
+      "steps": {
+        "step1Title": "Digital Sensor – Introduction",
+        "step1Text": "This tutorial is designed for **digital sensors** connected to a Raspberry Pi via GPIO. We'll show you how to measure state changes and send them to both a REST API and an MQTT broker. To start, add a gpio-in node and configure the pin that will receive your sensor readings.",
+
+        "step2Title": "Configure REST API Submission",
+        "step2Text": "In a function node, build a message object containing your API URL, an `X-Admin-Token` header (from `global.get('authKey')`), and in `msg.payload` a `sensor_name` and `value` (the new reading from `msg.payload`). Ensure `sensor_name` matches the type you assigned when creating the sensor.",
+
+        "step3Title": "Prepare MQTT Message",
+        "step3Text": "In the second function node (for MQTT), place the numeric reading into `msg.payload.value` and set `msg.topic` to `\"{sensor_name}-data\"`. This lets the MQTT Out node publish your sensor data under that topic.",
+
+        "step4Title": "Configure MQTT Output",
+        "step4Text": "In the mqtt out node, leave the **Topic** field blank so it uses `msg.topic`. Then select your preconfigured broker (e.g. “Sensor broker”) from the **Server** dropdown.",
+
+        "step5Title": "Configure HTTP Request",
+        "step5Text": "Add an http request node set to **POST**. In **Headers**, add `Content-Type: application/json`. Use the URL from `global.get('apiUrl') + 'api/sensor-readings'`.",
+
+        "bestPractices": "Best Practices",
+        "bestPractice1": "Choose consistent naming patterns for sensor types (e.g., temperature, humidity).",
+        "bestPractice2": "Use clear, descriptive names for both sensor groups and individual sensors.",
+        "bestPractice3": "Follow a consistent naming format for MQTT topics (for example, `temperature-data`).",
+        "bestPractice4": "Remember: the gpio-in node won’t generate readings on its own. Precede it with a timestamp (inject) node configured for your desired polling interval."
+      }
     },
     "logs": {
       "title": "Logs",

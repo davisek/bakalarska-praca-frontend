@@ -29,6 +29,7 @@ import Dialog from 'primevue/dialog';
 import InputNumber from "primevue/inputnumber";
 import DatePicker from "primevue/datepicker";
 import Select from "primevue/select";
+import Carousel from "primevue/carousel";
 
 import './style.css';
 import './primevue-style.css';
@@ -76,6 +77,7 @@ app.component('Tag', Tag);
 app.component('Dialog', Dialog);
 app.component('DatePicker', DatePicker);
 app.component('Select', Select);
+app.component('Carousel', Carousel);
 
 app.directive('focustrap', FocusTrap);
 app.config.globalProperties.$axios = axiosInstance;

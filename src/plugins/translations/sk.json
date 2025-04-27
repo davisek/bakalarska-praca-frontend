@@ -283,13 +283,39 @@
       "failedToLoadColorClasses": "Nepodarilo sa načítať farebné triedy",
       "failedToSaveGroup": "Nepodarilo sa uložiť skupinu senzorov",
       "failedToSaveSensor": "Nepodarilo sa uložiť senzor",
-      "sensorFieldsRequired": "Názov senzora, typ a zobrazený názov sú povinné",
+      "sensorNameRequired": "Názov senzora je povinný.",
+      "sensorTypeRequired": "Typ senzora je povinný.",
+      "sensorDisplayNameRequired": "Zobrazovaný názov je povinný.",
+      "cssClassRequired": "Musíte vybrať CSS triedu.",
       "groupNameValueRequired": "Názov a hodnota skupiny sú povinné",
       "groupImageRequired": "Obrázok skupiny je povinný",
       "sensorImageRequired": "Obrázok senzora je povinný",
       "sensorIconRequired": "Ikona senzora je povinná",
       "failedToDeleteGroup": "Nepodarilo sa vymazať skupinu senzorov",
-      "failedToDeleteSensor": "Nepodarilo sa vymazať senzor"
+      "failedToDeleteSensor": "Nepodarilo sa vymazať senzor",
+      "tutorial": "Návod",
+      "steps": {
+        "step1Title": "Digitálny senzor - úvod",
+        "step1Text": "Tento tutoriál je určený pre **digitálne senzory** pripojené k Raspberry Pi cez GPIO. Ukážeme si, ako namerať stavy, posielať ich na API aj do MQTT. Začneme vložením gpio-in uzlom a nastavíme na ňom pin, v ktorom budeme príjmať namerané údaje.",
+
+        "step2Title": "Nastavte odosielanie na REST API",
+        "step2Text": "Vo funkčnom uzle (function) vytvorte objekt so správou: URL vášho API, hlavičkou X-Admin-Token a v payloade sensor_name + value z msg.payload. Value je nová nameraná hodnota. sensor_name bude zodpovedať typu senzora, ktorý ste nastavili senzoru pri jeho vytváraní.",
+
+        "step3Title": "Pripravte MQTT správu",
+        "step3Text": "Druhá funkcia pre MQTT v msg.payload umiestni hodnotu a nastaví msg.topic na “{sensor_name}-data”. Tak MQTT uzol odosiela dáta. Taktiež nám tu senzor_name bude zodpovedať typ senzora.",
+
+        "step4Title": "Konfigurujte MQTT výstup",
+        "step4Text": "V mqtt out uzle nechajte pole Topic prázdne – berie ho z msg.topic. Vyberte už nastaveného brokera “Sensor broker” v Server dropdown.",
+
+        "step5Title": "Konfigurujte HTTP Request",
+        "step5Text": "Pridajte http request uzol s metódou POST. V hlavičkách zadajte Content-Type: application/json.",
+
+        "bestPractices": "Osvedčené postupy",
+        "bestPractice1": "Vyberte konzistentné vzory pomenovania pre typy senzorov (napr. teplota, vlhkosť).",
+        "bestPractice2": "Používajte jasné, popisné názvy pre skupiny aj senzory.",
+        "bestPractice3": "Držte sa konzistentného formátu názvov v MQTT témach (napr. teplota-data).",
+        "bestPractice4": "V tomto prípade gpio-in uzol nezačne zbierať dáta sám od seba. Je potrebné pred neho napojiť napríkald timestamp uzol, v ktorom sa nakonfiguruje, ako často sa má spúšťať."
+      }
     },
     "logs": {
       "title": "Logy",

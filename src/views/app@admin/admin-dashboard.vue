@@ -91,7 +91,7 @@ onMounted(() => {
             <h3 :class="['stat-label', isDarkMode ? 'dark-stat-label' : 'light-stat-label']">{{ t('admin.dashboard.totalSensors') }}</h3>
             <div class="stat-value">{{ stats.total_sensors }}</div>
             <div class="stat-info">
-              <span class="text-emerald-400">+{{ stats.new_readings_today }}</span> {{ t('admin.dashboard.newToday') }}
+              <span class="text-emerald-400">+{{ stats.new_readings_today }}</span> {{ t('admin.dashboard.newReadingsToday') }}
             </div>
           </div>
         </div>
