@@ -8,6 +8,8 @@ const options = {
 };
 const mqttClient = mqtt.connect(import.meta.env.VITE_MQTT_BROKER_URL, options);
 
+mqttClient.setMaxListeners(30);
+
 mqttClient.on('connect', () => {
     // console.log('Connected to MQTT broker');
 });
