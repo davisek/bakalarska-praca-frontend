@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import ABreadcrumb from "@/components/a-breadcrumb.vue";
+import AAdminKeyButton from "@/views/app@admin/app@sensors/a-admin-key-button.vue";
 import axiosInstance from "@/plugins/axios";
 import { showSuccess, showError } from "@/utils/notificationUtil";
 import {SensorGroup, Sensor, Enum} from '@/types';
@@ -469,7 +470,7 @@ onMounted(() => {
   <div class="lg:p-6 p-2">
     <ABreadcrumb class="lg:pl-4 lg:pt-4" />
     <div class="p-6">
-      <div class="mb-4 flex justify-between items-center">
+      <div class="mb-4 flex flex-col lg:flex-row justify-between items-center space-y-2 lg:space-y-0">
         <h1 :class="['text-2xl font-bold', isDarkMode ? 'text-white' : 'text-black']">{{ t('admin.sensors.title') }}</h1>
         <Button
             :label="t('admin.sensors.tutorial')"
@@ -478,6 +479,7 @@ onMounted(() => {
             @click="openTutorialDialog()"
             class="mr-2"
         />
+        <AAdminKeyButton />
         <Button
             :label="t('admin.sensors.addGroup')"
             icon="pi pi-plus"
