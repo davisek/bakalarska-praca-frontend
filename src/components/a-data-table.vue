@@ -34,7 +34,7 @@ const paginationMeta = ref<PaginationMeta>({
 });
 
 const sortField = ref('created_at');
-const sortOrder = ref(1);
+const sortOrder = ref(-1);
 
 const tableData = ref<SensorReading[]>([]);
 const errorMessage = ref<string | null>(null);
@@ -46,9 +46,9 @@ const calculatePercentageChange = (data: SensorReading[], sortOrder) => {
     let previousValue;
 
     if (sortOrder === -1) {
-      previousValue = data[index + 1]?.value;
-    } else {
       previousValue = data[index - 1]?.value;
+    } else {
+      previousValue = data[index + 1]?.value;
     }
 
     if (previousValue !== undefined && previousValue !== 0) {
@@ -67,7 +67,7 @@ const fetchRawData = async () => {
       page: paginationMeta.value.current_page,
       per_page: paginationMeta.value.per_page,
       sort_by: sortField.value,
-      sort_dir: sortOrder.value === 1 ? 'desc' : 'asc',
+      sort_dir: sortOrder.value === 1 ? 'asc' : 'desc',
     };
 
     if (props.fromDate) params.from = props.fromDate;

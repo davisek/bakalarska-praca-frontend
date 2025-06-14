@@ -161,7 +161,7 @@ onMounted(() => {
             @sort="onSort"
             paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
             currentPageReportTemplate="{first} to {last} of {totalRecords}"
-s            :loading="isLoading"
+            :loading="isLoading"
             responsiveLayout="scroll"
             :class="isDarkMode ? 'dark-table' : 'light-table'"
         >
